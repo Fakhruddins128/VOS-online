@@ -91,7 +91,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <div className="user-role">Administrator</div>
             </div>
           </div> */}
-          <p> VOS : Ver 1.0 </p>
+          <p> VIS : Ver 1.0 - Dev : Team IT</p>
         </div>
       </aside>
     </>
