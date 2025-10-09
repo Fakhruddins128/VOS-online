@@ -52,7 +52,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <span className="brand-icon"><img src={jafferjeesLogo} alt="Jafferjees Text" width="200px"  /></span>
+            <span className="brand-icon"><p>Vendor Information System</p></span>
             {/* <span className="brand-text">JPL</span> */}
           </div>
           <button 
@@ -91,7 +91,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               <div className="user-role">Administrator</div>
             </div>
           </div> */}
-          <p>Jafferjees Private Limited</p>
+          {/* <p> Vendor Information System</p> */}
         </div>
       </aside>
     </>

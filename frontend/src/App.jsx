@@ -35,7 +35,7 @@ function AppContent() {
           />
           <main className="main-content">
             <Routes>
-              <Route path="/" element={<Home />} />
+              <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pending-orders" element={<PendingOrders />} />

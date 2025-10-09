@@ -46,10 +46,10 @@ const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
               <span className="toggle-bar"></span>
             </button>
           )}
-          <Link to="/" className="navbar-brand" onClick={closeMenu}>
+          {/* <Link to="/" className="navbar-brand" onClick={closeMenu}>
             <span className="brand-icon">📊</span>
             <span className="brand-text dynamics-text-xl dynamics-font-semibold">Vendor Information System</span>
-          </Link>
+          </Link> */}
         </div>
 
         <div className={`navbar-menu ${isMenuOpen ? 'active' : ''}`}>
