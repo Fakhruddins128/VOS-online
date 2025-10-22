@@ -35,7 +35,7 @@ const Dashboard = () => {
 
         <div className="user-welcome">
           <h2>Hello, {user.VendorName || user.ContactPerson}!</h2>
-          <p>Welcome back to your VOS dashboard.</p>
+          <p>Welcome back to your VES dashboard.</p>
         </div>
 
         <div className="dashboard-content">

@@ -78,7 +78,7 @@ const Login = () => {
       <div className="login-card dynamics-card dynamics-shadow-xl">
         <div className="dynamics-card-header dynamics-text-center">
           <h2 className="dynamics-text-2xl dynamics-font-bold dynamics-mb-2">Welcome Back</h2>
-          <p className="dynamics-text-secondary">Sign in to your VOS account</p>
+          <p className="dynamics-text-secondary">Sign in to your VES account</p>
         </div>
         
         <div className="dynamics-card-body">

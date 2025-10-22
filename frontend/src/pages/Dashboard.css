@@ -140,6 +140,7 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+  text-align: center;
 }
 
 .user-info p {
@@ -147,6 +148,7 @@
   color: #555;
   padding: 0.5rem 0;
   border-bottom: 1px solid #eee;
+    text-align: center;
 }
 
 .user-info p:last-child {
