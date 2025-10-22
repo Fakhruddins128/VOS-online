@@ -64,7 +64,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             <div className="user-avatar" aria-hidden="true">{getAvatarText()}</div>
             <div className="user-details">
               <div className="user-name">VES Version 1.0.0 </div>
-              <div className="user-role">Team IT</div>
+              <div className="user-role">Team IT copyright 2025</div>
             </div>
           </div>
         </div>
