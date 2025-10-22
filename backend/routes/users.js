@@ -1,6 +1,16 @@
 const express = require('express');
 const database = require('../config/database');
 const router = express.Router();
+const crypto = require('crypto');
+
+// Helper functions for password hashing
+function generateSalt() {
+  return crypto.randomBytes(16).toString('hex');
+}
+
+function hashPassword(password, salt) {
+  return crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
+}
 
 // POST /api/users/login - Vendor login with BusinessEmail and password
 router.post('/login', async (req, res) => {
@@ -45,7 +55,8 @@ router.post('/login', async (req, res) => {
       email: vendor.BusinessEmail,
       companyName: vendor.CompanyName || vendor.companyName,
       isActive: vendor.Is_Active || vendor.is_active,
-      hasPassword: !!(vendor.Password || vendor.password)
+      hasPassword: !!(vendor.Password || vendor.password),
+      hasSalt: !!(vendor.Salt || vendor.salt)
     });
     
     // Check if vendor is active (handle both cases)
@@ -58,10 +69,21 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    // Compare passwords (in production, use proper password hashing)
-    console.log('Comparing passwords...');
-    const vendorPassword = vendor.Password || vendor.password;
-    if (vendorPassword !== password) {
+    // Compare passwords using salted PBKDF2 hashing if salt exists; otherwise fallback
+    console.log('Comparing passwords securely...');
+    const vendorPassword = vendor.Password ?? vendor.password;
+    const vendorSalt = vendor.Salt ?? vendor.salt;
+
+    let isMatch = false;
+    if (vendorSalt) {
+      const hashedInput = hashPassword(password, vendorSalt);
+      isMatch = vendorPassword === hashedInput;
+    } else {
+      // Fallback for legacy records without salt
+      isMatch = vendorPassword === password;
+    }
+
+    if (!isMatch) {
       console.log('Login failed: Password mismatch');
       return res.status(401).json({
         success: false,
@@ -72,12 +94,12 @@ router.post('/login', async (req, res) => {
     console.log('Login successful for:', BusinessEmail);
     
     // Remove password from response and map field names for frontend
-    const { Password, password: pwd, ...vendorData } = vendor;
+    const { Password, password: pwd, Salt, salt, ...vendorData } = vendor;
     
     // Map database field names to frontend expected field names
     const mappedVendorData = {
       ...vendorData,
-      ID: vendorData.ID || vendorData.id, // Ensure ID is preserved
+      ID: vendorData.ID || vendorData.id,
       VendorName: vendorData.CompanyName,
       ContactPerson: vendorData.Ref_Name,
       PhoneNumber: vendorData.BusinessPhone,
@@ -120,6 +142,80 @@ router.get('/vendors', async (req, res) => {
       error: 'Failed to fetch vendors',
       details: error.message
     });
+  }
+});
+
+// Add Change Password endpoint
+router.post('/change-password', async (req, res) => {
+  try {
+    const { BusinessEmail, oldPassword, newPassword } = req.body;
+
+    if (!BusinessEmail || !oldPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'BusinessEmail, oldPassword, and newPassword are required'
+      });
+    }
+
+    // Server-side password policy
+    const policyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
+    if (!policyRegex.test(newPassword)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character'
+      });
+    }
+    if (newPassword === oldPassword) {
+      return res.status(400).json({
+        success: false,
+        error: 'New password must be different from old password'
+      });
+    }
+
+    // Fetch vendor
+    const result = await database.query(`
+      SELECT * FROM Vendor WHERE BusinessEmail = @BusinessEmail
+    `, { BusinessEmail });
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: 'Vendor not found' });
+    }
+
+    const vendor = result.recordset[0];
+    const isActive = vendor.Is_Active || vendor.is_active;
+    if (!isActive) {
+      return res.status(401).json({ success: false, error: 'Account is not active' });
+    }
+
+    // Verify old password
+    const currentHash = vendor.Password ?? vendor.password;
+    const currentSalt = vendor.Salt ?? vendor.salt;
+
+    let oldMatches = false;
+    if (currentSalt) {
+      oldMatches = currentHash === hashPassword(oldPassword, currentSalt);
+    } else {
+      oldMatches = currentHash === oldPassword;
+    }
+
+    if (!oldMatches) {
+      return res.status(401).json({ success: false, error: 'Old password is incorrect' });
+    }
+
+    // Generate new salt and hash
+    const newSalt = generateSalt();
+    const newHash = hashPassword(newPassword, newSalt);
+
+    // Update in database
+    await database.query(`
+      UPDATE Vendor SET Password = @Password, Salt = @Salt
+      WHERE BusinessEmail = @BusinessEmail
+    `, { Password: newHash, Salt: newSalt, BusinessEmail });
+
+    return res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    console.error('Error changing password:', error);
+    return res.status(500).json({ success: false, error: 'Failed to change password: ' + error.message });
   }
 });
 

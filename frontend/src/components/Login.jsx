@@ -35,9 +35,20 @@ const Login = () => {
         body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response
+      }
 
-      if (data.success) {
+      if (!response.ok) {
+        const msg = data?.error || (response.status === 401 ? 'Invalid email or password' : 'Login failed');
+        setMessage(msg);
+        return;
+      }
+
+      if (data?.success) {
         setMessage('Login successful!');
         login(data.data);
         setFormData({ BusinessEmail: '', password: '' });
@@ -46,7 +57,7 @@ const Login = () => {
           navigate('/dashboard');
         }, 500);
       } else {
-        setMessage(data.error || 'Login failed');
+        setMessage(data?.error || 'Login failed');
       }
     } catch (error) {
       setMessage('Network error. Please try again.');
@@ -71,6 +82,15 @@ const Login = () => {
         </div>
         
         <div className="dynamics-card-body">
+          {message && (
+            <div
+              className={`message ${message.includes('successful') ? 'success' : 'error'} dynamics-p-4 dynamics-rounded-md dynamics-mb-4 ${message.includes('successful') ? 'dynamics-bg-success dynamics-text-inverse' : 'dynamics-bg-error dynamics-text-inverse'}`}
+              role="alert"
+              aria-live="assertive"
+            >
+              {message}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="login-form">
             <div className="dynamics-form-group">
               <label htmlFor="BusinessEmail" className="dynamics-label">Business Email</label>
@@ -111,13 +131,7 @@ const Login = () => {
           </form>
         </div>
         
-        {message && (
-          <div className={`message dynamics-p-4 dynamics-rounded-md dynamics-mb-4 ${
-            message.includes('successful') ? 'dynamics-bg-success dynamics-text-inverse' : 'dynamics-bg-error dynamics-text-inverse'
-          }`}>
-            {message}
-          </div>
-        )}
+        {/* Removed duplicate message block below card body; message now shows above form */}
       </div>
     </div>
   );

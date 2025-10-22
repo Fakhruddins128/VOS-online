@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Dashboard from './pages/Dashboard';
 import PendingOrders from './pages/PendingOrders';
 import PurchaseOrderDraft from './pages/PurchaseOrderDraft';
+import ChangePassword from './pages/ChangePassword';
 import './styles/dynamics-theme.css';
 import './App.css';
 
@@ -40,6 +41,7 @@ function AppContent() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pending-orders" element={<PendingOrders />} />
               <Route path="/purchase-order-draft" element={<PurchaseOrderDraft />} />
+              <Route path="/change-password" element={<ChangePassword />} />
             </Routes>
           </main>
         </div>

@@ -34,10 +34,16 @@ api.interceptors.response.use(
   },
   (error) => {
     // Handle common errors
-    if (error.response?.status === 401) {
-      // Unauthorized - redirect to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+    const status = error.response?.status;
+    const url = error.config?.url || '';
+
+    if (status === 401) {
+      // Skip redirect for change-password to allow showing validation errors
+      const isChangePassword = url.includes('/users/change-password');
+      if (!isChangePassword) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject({
@@ -55,6 +61,7 @@ export const userAPI = {
   create: (userData) => api.post('/users', userData),
   update: (id, userData) => api.put(`/users/${id}`, userData),
   delete: (id) => api.delete(`/users/${id}`),
+  changePassword: (payload) => api.post('/users/change-password', payload),
 };
 
 // Product API functions

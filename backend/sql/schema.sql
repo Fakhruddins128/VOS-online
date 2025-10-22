@@ -8,6 +8,7 @@ CREATE TABLE Vendor (
     ID INT IDENTITY(1,1) PRIMARY KEY,
     BusinessEmail NVARCHAR(100) UNIQUE NOT NULL,
     Password NVARCHAR(255) NOT NULL,
+    Salt NVARCHAR(255) NULL,
     CompanyName NVARCHAR(100),
     Ref_Name NVARCHAR(100),
     BusinessPhone NVARCHAR(20),

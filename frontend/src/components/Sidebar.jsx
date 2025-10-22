@@ -1,100 +1,35 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import jafferjeesLogo from '../assets/jafferjees-text.png';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const location = useLocation();
 
   const menuItems = [
-    // {
-    //   id: 'home',
-    //   label: 'Home',
-    //   path: '/',
-    //   icon: '🏠'
-    // },
-    {
-      id: 'dashboard',
-      label: 'Dashboard',
-      path: '/dashboard',
-      icon: '📊'
-    },
-    {
-      id: 'pending-orders',
-      label: 'Pending Orders',
-      path: '/pending-orders',
-      icon: '📋'
-    },
-    {
-      id: 'purchase-order-draft',
-      label: 'Purchase Order Draft',
-      path: '/purchase-order-draft',
-      icon: '📝'
-    },
-   // {
-   //   id: 'login',
-   //   label: 'Login',
-   //   path: '/login',
-    //  icon: '🔐'
-  //  }
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: '🏠' },
+    { id: 'pending-orders', label: 'Pending Orders', path: '/pending-orders', icon: '🕒' },
+    { id: 'purchase-order-draft', label: 'Purchase Order Draft', path: '/purchase-order-draft', icon: '📝' },
+    { id: 'change-password', label: 'Change Password', path: '/change-password', icon: '🔑' },
   ];
 
   return (
-    <>
-      {/* Overlay for mobile */}
-      {isOpen && (
-        <div 
-          className="sidebar-overlay"
-          onClick={toggleSidebar}
-        />
-      )}
-      
-      <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-brand">
-            <span className="brand-icon"><p>Vendor Information System</p></span>
-            {/* <span className="brand-text">JPL</span> */}
-          </div>
-          <button 
-            className="sidebar-close"
-            onClick={toggleSidebar}
-            aria-label="Close sidebar"
-          >
-            ✕
-          </button>
-        </div>
-        
-        <nav className="sidebar-nav">
-          <ul className="nav-menu">
-            {menuItems.map((item) => (
-              <li key={item.id} className="nav-item">
-                <Link
-                  to={item.path}
-                  className={`nav-link ${
-                    location.pathname === item.path ? 'active' : ''
-                  }`}
-                  onClick={toggleSidebar}
-                >
-                  <span className="nav-icon">{item.icon}</span>
-                  <span className="nav-text">{item.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        
-        <div className="sidebar-footer">
-          {/* <div className="user-info">
-            <div className="user-avatar">👤</div>
-            <div className="user-details">
-              <div className="user-name">User</div>
-              <div className="user-role">Administrator</div>
-            </div>
-          </div> */}
-          <p> VIS : Ver 1.0 - Dev : Team IT</p>
-        </div>
-      </aside>
-    </>
+    <aside className={`sidebar ${isOpen ? 'open' : ''}`}>
+      <button className="toggle-button" onClick={toggleSidebar} aria-label="Toggle Sidebar">
+        ☰
+      </button>
+      <nav className="sidebar-nav">
+        <ul>
+          {menuItems.map(item => (
+            <li key={item.id} className={location.pathname === item.path ? 'active' : ''}>
+              <Link to={item.path}>
+                <span className="icon" aria-hidden="true">{item.icon}</span>
+                <span className="label">{item.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </aside>
   );
 };
 
