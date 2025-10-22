@@ -32,7 +32,8 @@ const corsOptions = {
       // Allow all Vercel domains for production
       /^https:\/\/.*\.vercel\.app$/,
       // Allow specific production domains
-      'https://vos-frontend.vercel.app'
+     'https://vos-frontend.vercel.app',
+      'https://www.vendorserp.com'
     ].filter(Boolean); // Remove undefined values
     
     // Check if origin is allowed (string match or regex match)
