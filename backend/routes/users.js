@@ -3,6 +3,9 @@ const database = require('../config/database');
 const router = express.Router();
 const crypto = require('crypto');
 
+// Dev-only logger
+const debugLog = (...args) => { if (process.env.NODE_ENV !== 'production') console.log(...args); };
+
 // Helper functions for password hashing
 function generateSalt() {
   return crypto.randomBytes(16).toString('hex');
@@ -16,11 +19,11 @@ function hashPassword(password, salt) {
 router.post('/login', async (req, res) => {
   try {
     const { BusinessEmail, password } = req.body;
-    console.log('Login attempt for:', BusinessEmail);
+    debugLog('Login attempt for:', BusinessEmail);
     
     // Validate input
     if (!BusinessEmail || !password) {
-      console.log('Login failed: Missing credentials');
+      debugLog('Login failed: Missing credentials');
       return res.status(400).json({
         success: false,
         error: 'BusinessEmail and password are required'
@@ -28,20 +31,20 @@ router.post('/login', async (req, res) => {
     }
     
     // Find vendor by BusinessEmail using correct column names
-    console.log('Querying database for vendor:', BusinessEmail);
+    debugLog('Querying database for vendor:', BusinessEmail);
     const result = await database.query(`
       SELECT * 
       FROM Vendor 
       WHERE BusinessEmail = @BusinessEmail
     `, { BusinessEmail });
     
-    console.log('Database query result:', {
+    debugLog('Database query result:', {
       recordCount: result.recordset.length,
       hasData: result.recordset.length > 0
     });
     
     if (result.recordset.length === 0) {
-      console.log('Login failed: Vendor not found');
+      debugLog('Login failed: Vendor not found');
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials - vendor not found'
@@ -49,8 +52,8 @@ router.post('/login', async (req, res) => {
     }
     
     const vendor = result.recordset[0];
-    console.log('Full vendor object:', vendor);
-    console.log('Found vendor:', {
+    debugLog('Full vendor object:', vendor);
+    debugLog('Found vendor:', {
       id: vendor.ID || vendor.id,
       email: vendor.BusinessEmail,
       companyName: vendor.CompanyName || vendor.companyName,
@@ -62,7 +65,7 @@ router.post('/login', async (req, res) => {
     // Check if vendor is active (handle both cases)
     const isActive = vendor.Is_Active || vendor.is_active;
     if (!isActive) {
-      console.log('Login failed: Vendor not active');
+      debugLog('Login failed: Vendor not active');
       return res.status(401).json({
         success: false,
         error: 'Account is not active'
@@ -70,7 +73,7 @@ router.post('/login', async (req, res) => {
     }
     
     // Compare passwords using salted PBKDF2 hashing if salt exists; otherwise fallback
-    console.log('Comparing passwords securely...');
+    debugLog('Comparing passwords securely...');
     const vendorPassword = vendor.Password ?? vendor.password;
     const vendorSalt = vendor.Salt ?? vendor.salt;
 
@@ -84,14 +87,14 @@ router.post('/login', async (req, res) => {
     }
 
     if (!isMatch) {
-      console.log('Login failed: Password mismatch');
+      debugLog('Login failed: Password mismatch');
       return res.status(401).json({
         success: false,
         error: 'Invalid credentials - password mismatch'
       });
     }
     
-    console.log('Login successful for:', BusinessEmail);
+    debugLog('Login successful for:', BusinessEmail);
     
     // Remove password from response and map field names for frontend
     const { Password, password: pwd, Salt, salt, ...vendorData } = vendor;
@@ -125,10 +128,10 @@ router.post('/login', async (req, res) => {
 // GET /api/users/vendors - List all vendors (for debugging)
 router.get('/vendors', async (req, res) => {
   try {
-    console.log('Fetching all vendors from database...');
+    debugLog('Fetching all vendors from database...');
     const result = await database.query('SELECT BusinessEmail, CompanyName, Is_Active FROM Vendor');
     
-    console.log('Found vendors:', result.recordset.length);
+    debugLog('Found vendors:', result.recordset.length);
     
     res.json({
       success: true,

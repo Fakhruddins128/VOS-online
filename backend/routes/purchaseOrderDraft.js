@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../config/database');
+const debugLog = (...args) => { if (process.env.NODE_ENV !== 'production') console.log(...args); };
 
 // Get Purchase Order Draft data based on category
 router.get('/', async (req, res) => {
@@ -12,7 +13,8 @@ router.get('/', async (req, res) => {
     }
 
     let query = '';
-    console.log('category', category);
+    // Gate category log to development only
+    debugLog('category', category);
     switch (category) {
       case 'Material':
         query = `SELECT V.CompanyName as Vendor, OM.OrderNo, OM.OrderDate, 

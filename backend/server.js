@@ -9,47 +9,47 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const isProd = process.env.NODE_ENV === 'production';
 
 // Import route files
 const usersRoutes = require('./routes/users');
 const pendingOrdersRoutes = require('./routes/pendingOrders');
 const purchaseOrderDraftRoutes = require('./routes/purchaseOrderDraft');
 
+// Helper to parse comma-separated origins from env
+const parseOrigins = (value) => (value || '').split(',').map(s => s.trim()).filter(Boolean);
+
 // CORS Configuration
 const corsOptions = {
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
+
+    const devOrigins = [
       'http://localhost:3000',
       'http://localhost:5173',
       'http://localhost:5174',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5173',
-      'http://127.0.0.1:5174',
-      process.env.FRONTEND_URL,
-      // Allow all Vercel domains for production
-      /^https:\/\/.*\.vercel\.app$/,
-      // Allow specific production domains
-     'https://vos-frontend.vercel.app',
-      'https://www.vendorserp.com'
-    ].filter(Boolean); // Remove undefined values
-    
-    // Check if origin is allowed (string match or regex match)
-    const isAllowed = allowedOrigins.some(allowedOrigin => {
-      if (typeof allowedOrigin === 'string') {
-        return allowedOrigin === origin;
-      } else if (allowedOrigin instanceof RegExp) {
-        return allowedOrigin.test(origin);
-      }
-      return false;
-    });
-    
+      'http://127.0.0.1:5174'
+    ];
+
+    const envOrigins = parseOrigins(process.env.ALLOWED_ORIGINS);
+    const baseOrigin = process.env.FRONTEND_URL;
+    const allowedOrigins = [
+      ...(isProd ? [] : devOrigins),
+      baseOrigin,
+      ...envOrigins
+    ].filter(Boolean);
+
+    const isAllowed = allowedOrigins.some(allowedOrigin => allowedOrigin === origin);
+
     if (isAllowed) {
       callback(null, true);
     } else {
-      console.log(`CORS blocked origin: ${origin}`);
+      if (!isProd) {
+        console.log(`CORS blocked origin: ${origin}`);
+      }
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -109,7 +109,9 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(morgan('combined'));
+if (!isProd) {
+  app.use(morgan('combined'));
+}
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
@@ -123,22 +125,24 @@ app.use('/api/users', authLimiter, usersRoutes);
 app.use('/api/pending-orders', pendingOrdersRoutes);
 app.use('/api/purchase-order-draft', purchaseOrderDraftRoutes);
 
-// Database connection test endpoint
-app.get('/api/db-test', async (req, res) => {
-  try {
-    const isConnected = await database.testConnection();
-    res.json({ 
-      success: isConnected, 
-      message: isConnected ? 'Database connection successful' : 'Database connection failed'
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Database connection error',
-      error: error.message 
-    });
-  }
-});
+// Database connection test endpoint (disabled in production)
+if (!isProd) {
+  app.get('/api/db-test', async (req, res) => {
+    try {
+      const isConnected = await database.testConnection();
+      res.json({ 
+        success: isConnected, 
+        message: isConnected ? 'Database connection successful' : 'Database connection failed'
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        success: false, 
+        message: 'Database connection error',
+        error: error.message 
+      });
+    }
+  });
+}
 
 // Health check endpoint
 app.get('/health', (req, res) => {

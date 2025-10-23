@@ -1,11 +1,13 @@
 const express = require('express');
 const database = require('../config/database');
 const router = express.Router();
+const debugLog = (...args) => { if (process.env.NODE_ENV !== 'production') console.log(...args); };
 
 // GET /api/pending-orders - Get pending orders data with pagination, sorting, and filtering
 router.get('/', async (req, res) => {
   try {
-    console.log('Fetching pending orders data...');
+    // Replace noisy startup log with dev-only logger
+    debugLog('Fetching pending orders data...');
     
     // Extract query parameters
     const {
