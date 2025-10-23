@@ -45,6 +45,11 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     }
+
+    // Redirect to login on 404 (page/resource not found)
+    if (status === 404) {
+      window.location.href = '/login';
+    }
     
     return Promise.reject({
       message: error.response?.data?.error || error.message || 'An error occurred',

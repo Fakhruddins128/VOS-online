@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { useState } from 'react';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -42,6 +42,8 @@ function AppContent() {
               <Route path="/pending-orders" element={<PendingOrders />} />
               <Route path="/purchase-order-draft" element={<PurchaseOrderDraft />} />
               <Route path="/change-password" element={<ChangePassword />} />
+              {/* Catch-all route to redirect 404s to login */}
+              <Route path="*" element={<Navigate to="/login" replace />} />
             </Routes>
           </main>
         </div>

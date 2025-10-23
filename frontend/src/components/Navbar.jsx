@@ -15,13 +15,9 @@ const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
     closeMenu();
   };
 
-  const navItems = [
-    { path: '/', label: 'Home', icon: '🏠' },
-    ...(isAuthenticated 
-      ? [{ action: 'logout', label: 'Logout', icon: '🚪' }]
-      : [{ path: '/login', label: 'Login', icon: '🔐' }]
-    ),
-  ];
+  const navItems = isAuthenticated 
+    ? [{ action: 'logout', label: 'Logout', icon: '🚪' }]
+    : [{ path: '/login', label: 'Login', icon: '🔐' }];
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);

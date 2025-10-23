@@ -50,6 +50,14 @@ const PendingOrders = () => {
       
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const response = await fetch(`${API_BASE_URL}/api/pending-orders?${queryParams}`);
+
+      // Redirect on 404
+      if (response.status === 404) {
+        window.location.href = '/login';
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error('Failed to fetch pending orders');
       }

@@ -46,6 +46,13 @@ const PurchaseOrderDraft = () => {
         }
       );
 
+      // Redirect on 404
+      if (response.status === 404) {
+        window.location.href = '/login';
+        setLoading(false);
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
