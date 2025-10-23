@@ -28,15 +28,16 @@ const Dashboard = () => {
       <div className="dashboard-container">
         <header className="dashboard-header">
           <h1>Welcome to Your Dashboard</h1>
-          <button onClick={handleLogout} className="logout-btn">
+          {/* <button onClick={handleLogout} className="logout-btn">
             Logout
-          </button>
+          </button> */}
+           <h2>Hello, {user.ContactPerson || user.VendorName}!</h2>
         </header>
 
-        <div className="user-welcome">
-          <h2>Hello, {user.VendorName || user.ContactPerson}!</h2>
-          <p>Welcome back to your VES dashboard.</p>
-        </div>
+        {/* <div className="user-welcome">
+          <h2>Hello, {user.ContactPerson || user.VendorName}!</h2>
+        ----  <p>Welcome back to your VES dashboard.</p>
+        </div> */}
 
         <div className="dashboard-content">
           <div className="dashboard-grid">
