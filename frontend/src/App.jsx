@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import PendingOrders from './pages/PendingOrders';
 import PurchaseOrderDraft from './pages/PurchaseOrderDraft';
 import ChangePassword from './pages/ChangePassword';
+import ForgotPassword from './pages/ForgotPassword';
 import './styles/dynamics-theme.css';
 import './App.css';
 
@@ -20,7 +21,7 @@ function AppContent() {
   };
 
   // Pages where sidebar should be hidden
-  const hideSidebarPages = ['/', '/login'];
+  const hideSidebarPages = ['/', '/login', '/forgot-password'];
   const shouldShowSidebar = !hideSidebarPages.includes(location.pathname);
 
   return (
@@ -38,6 +39,7 @@ function AppContent() {
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pending-orders" element={<PendingOrders />} />
               <Route path="/purchase-order-draft" element={<PurchaseOrderDraft />} />

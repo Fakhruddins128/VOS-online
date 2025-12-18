@@ -22,7 +22,7 @@ const parseOrigins = (value) => (value || '').split(',').map(s => s.trim()).filt
 // CORS Configuration
 const corsOptions = {
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (like curl requests)
     if (!origin) return callback(null, true);
 
     const devOrigins = [

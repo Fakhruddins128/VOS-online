@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Login.css';
 
@@ -118,6 +118,12 @@ const Login = () => {
                 placeholder="Enter your password"
                 className="dynamics-input"
               />
+            </div>
+
+            <div className="dynamics-text-right dynamics-mb-4">
+              <Link to="/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--primary-color)' }}>
+                Forgot Password?
+              </Link>
             </div>
             
             <button 

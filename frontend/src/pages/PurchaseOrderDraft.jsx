@@ -106,6 +106,68 @@ const PurchaseOrderDraft = () => {
     fetchPurchaseOrderDraft(selectedCategory);
   };
 
+  const printDrafts = () => {
+    const now = new Date().toLocaleString();
+    const html = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Purchase Order Draft</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
+            h1 { margin: 0 0 4px; font-size: 20px; }
+            .meta { margin: 0 0 12px; font-size: 12px; color: #555; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+            th { background: #f5f5f5; text-align: left; }
+            .right { text-align: right; }
+            .small { font-size: 11px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <h1>Purchase Order Draft</h1>
+          <div class="meta">Generated: ${now} • Category: ${selectedCategory} • Total: ${totalCount}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Vendor</th>
+                <th>Order No.</th>
+                <th>Order Date</th>
+                <th>Item Code</th>
+                <th>Old Code</th>
+                <th>Description</th>
+                <th class="right">Reserve Qty</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr>
+                  <td>${o.Vendor ?? ''}</td>
+                  <td>${o.OrderNo ?? ''}</td>
+                  <td>${o.OrderDate ? new Date(o.OrderDate).toLocaleDateString() : ''}</td>
+                  <td>${o.ItemCode ?? ''}</td>
+                  <td>${o.OldCode ?? ''}</td>
+                  <td>${o.Description ?? ''}</td>
+                  <td class="right">${o.ReserveQty ?? ''}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="small">This print reflects the current category selection.</div>
+        </body>
+      </html>
+    `;
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
+    }
+  };
+
   // Redirect to login if not authenticated
    useEffect(() => {
      if (!isAuthenticated) {
@@ -131,6 +193,9 @@ const PurchaseOrderDraft = () => {
           <h1>Purchase Order Draft</h1>
           <button onClick={handleRefresh} className="refresh-btn" disabled={loading}>
             🔄 Refresh
+          </button>
+          <button onClick={printDrafts} className="refresh-btn" style={{ marginLeft: '8px' }} disabled={loading}>
+            🖨️ Print
           </button>
         </header>
 

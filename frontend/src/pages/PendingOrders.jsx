@@ -119,6 +119,74 @@ const PendingOrders = () => {
     setCurrentPage(1); // Reset to first page when changing limit
   };
 
+  const printOrders = () => {
+    const now = new Date().toLocaleString();
+    const html = `
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Pending Orders</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
+            h1 { margin: 0 0 4px; font-size: 20px; }
+            .meta { margin: 0 0 12px; font-size: 12px; color: #555; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { border: 1px solid #ddd; padding: 8px; font-size: 12px; }
+            th { background: #f5f5f5; text-align: left; }
+            .right { text-align: right; }
+            .small { font-size: 11px; color: #666; }
+          </style>
+        </head>
+        <body>
+          <h1>Pending Orders</h1>
+          <div class="meta">Generated: ${now} • Sort: ${sortBy} ${sortOrder} • Page: ${currentPage} • Per page: ${limit} • Total: ${totalRecords}</div>
+          <table>
+            <thead>
+              <tr>
+                <th>Order No.</th>
+                <th>Date</th>
+                <th>Item Code</th>
+                <th>Description</th>
+                <th class="right">Order</th>
+                <th class="right">QC</th>
+                <th class="right">Pending</th>
+                <th>Delivery Date</th>
+                <th>Final Date</th>
+                <th class="right">Closing Days</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${orders.map(o => `
+                <tr>
+                  <td>${o['Order #'] ?? ''}</td>
+                  <td>${o.Date ?? ''}</td>
+                  <td>${o['Item Code'] ?? ''}</td>
+                  <td>${o.Description ?? ''}</td>
+                  <td class="right">${o.Order ?? ''}</td>
+                  <td class="right">${o.QC ?? ''}</td>
+                  <td class="right">${o.Pending ?? ''}</td>
+                  <td>${o['Delivery Date'] ?? ''}</td>
+                  <td>${o['FDDate'] ?? ''}</td>
+                  <td class="right">${o.ClosingDays ?? ''}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+          <div class="small">This print reflects the current sort and page selection.</div>
+        </body>
+      </html>
+    `;
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      w.focus();
+      w.print();
+    }
+  };
+
   if (loading) {
     return (
       <div className="pending-orders">
@@ -151,6 +219,9 @@ const PendingOrders = () => {
           <h1>Pending Orders</h1>
           <button onClick={fetchPendingOrders} className="refresh-btn">
             🔄 Refresh
+          </button>
+          <button onClick={printOrders} className="refresh-btn" style={{ marginLeft: '8px' }}>
+            🖨️ Print
           </button>
         </header>
 

@@ -2,6 +2,7 @@ const express = require('express');
 const database = require('../config/database');
 const router = express.Router();
 const crypto = require('crypto');
+const emailService = require('../services/emailService');
 
 // Dev-only logger
 const debugLog = (...args) => { if (process.env.NODE_ENV !== 'production') console.log(...args); };
@@ -219,6 +220,63 @@ router.post('/change-password', async (req, res) => {
   } catch (error) {
     console.error('Error changing password:', error);
     return res.status(500).json({ success: false, error: 'Failed to change password: ' + error.message });
+  }
+});
+
+// POST /api/users/forgot-password - Reset password and send to email
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { BusinessEmail } = req.body;
+    
+    if (!BusinessEmail) {
+      return res.status(400).json({ success: false, error: 'BusinessEmail is required' });
+    }
+
+    // Find vendor by BusinessEmail
+    const result = await database.query(`
+      SELECT * FROM Vendor WHERE BusinessEmail = @BusinessEmail
+    `, { BusinessEmail });
+
+    if (result.recordset.length === 0) {
+      // For security, don't reveal that the user doesn't exist, or do reveal depending on policy.
+      // Usually generic message is better, but for internal tools explicit is okay.
+      // Let's go with explicit for this use case as it's a vendor portal.
+      return res.status(404).json({ success: false, error: 'Email not registered' });
+    }
+
+    const vendor = result.recordset[0];
+    const isActive = vendor.Is_Active || vendor.is_active;
+    if (!isActive) {
+      return res.status(401).json({ success: false, error: 'Account is not active' });
+    }
+
+    // Generate new random password
+    const newPassword = crypto.randomBytes(4).toString('hex') + Math.floor(Math.random() * 1000); // e.g. "a1b2c3d4123"
+    const salt = generateSalt();
+    const hashedPassword = hashPassword(newPassword, salt);
+
+    // Update password in DB
+    await database.query(`
+      UPDATE Vendor SET Password = @Password, Salt = @Salt
+      WHERE BusinessEmail = @BusinessEmail
+    `, { Password: hashedPassword, Salt: salt, BusinessEmail });
+
+    // Send email
+    const emailResult = await emailService.sendPasswordResetEmail(BusinessEmail, newPassword);
+
+    if (emailResult.success) {
+      return res.json({ success: true, message: 'New password sent to your email.' });
+    } else {
+      return res.status(500).json({ 
+        success: false, 
+        error: 'Password reset but failed to send email. Please contact support.',
+        details: emailResult.error 
+      });
+    }
+
+  } catch (error) {
+    console.error('Error in forgot-password:', error);
+    return res.status(500).json({ success: false, error: 'Internal server error: ' + error.message });
   }
 });
 
