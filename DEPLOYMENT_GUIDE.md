@@ -4,13 +4,17 @@
 - **Backend**: Deployed on Render.com at `https://voslive-1.onrender.com`
 - **Frontend**: Ready for Vercel deployment
 
-## Steps to Fix the Connection
+## Deployment Steps
+
+Use these steps to deploy the VOS frontend to Vercel and the backend to Render.com, and to ensure they can communicate correctly.
 
 ### 1. ✅ Frontend Configuration (COMPLETED)
 The frontend environment variables have been updated to connect to your Render.com backend:
 ```
 VITE_API_BASE_URL=https://voslive-1.onrender.com
 ```
+
+For local development, you can omit this variable. The frontend will automatically use `http://localhost:5000` as the API base URL while you run the backend locally.
 
 ### 2. ✅ Backend CORS Configuration (COMPLETED)
 The backend now allows requests from:

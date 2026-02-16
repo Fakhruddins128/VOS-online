@@ -5,6 +5,7 @@ Welcome to the Vendor Portal User Guide. This document provides step-by-step ins
 ## Table of Contents
 1. [Getting Started](#getting-started)
 2. [Login](#login)
+   - [Forgot Password](#forgot-password)
 3. [Dashboard](#dashboard)
 4. [Managing Orders](#managing-orders)
    - [Pending Orders](#pending-orders)
@@ -33,6 +34,17 @@ Welcome to the Vendor Portal User Guide. This document provides step-by-step ins
 
 > **Note:** If you enter incorrect credentials, an error message will appear. Please ensure your email and password are correct.
 
+### Forgot Password
+
+If you forget your password:
+
+1. Go to the **Login** page.
+2. Click the **Forgot Password?** link below the password field.
+3. Enter your **Business Email** and submit the form.
+4. Follow the instructions you receive (for example, a new password or reset instructions).
+
+If you do not receive any instructions, contact your system administrator for help.
+
 ---
 
 ## Dashboard
@@ -60,6 +72,8 @@ Navigate to the **Pending Orders** page via the sidebar menu. This section lists
 - **Sort:** Click on column headers (e.g., Order No) to sort the list in Ascending or Descending order.
 - **Pagination:** Use the page numbers at the bottom to navigate through large lists of orders.
 - **View Images:** If an order has an associated image, click the image icon/button to view a larger version of the product image along with its description and item code.
+- **Items per Page:** Use the dropdown above the table to choose how many orders to show per page (for example, 10, 25, 50, or 100).
+- **Print List:** Use the **Print** button to open a printer-friendly view of the current list of orders.
 
 ### Purchase Order Drafts
 
@@ -74,6 +88,7 @@ Navigate to the **Purchase Order Draft** page via the sidebar menu.
   - Finish Product
 - **View Details:** Browse the list of draft orders for the selected category.
 - **View Images:** Similar to pending orders, you can click on available images to view product details.
+- **Print Drafts:** Use the **Print** button to generate a printer-friendly version of the current category’s draft orders.
 
 ---
 
@@ -105,6 +120,12 @@ It is recommended to update your password periodically for security.
 ### Login Failed
 - **Invalid Email or Password:** Double-check your credentials. Ensure Caps Lock is off.
 - **Network Error:** Check your internet connection.
+
+### Password Reset Issues
+- If you requested a password reset but did not receive any instructions:
+  - Check your spam or junk email folder.
+  - Verify that you entered the correct **Business Email**.
+  - If you still do not see a message, contact the system administrator.
 
 ### No Data Visible
 - If you see no orders in "Pending Orders" or "Purchase Order Drafts," it means there are currently no records associated with your account for the selected criteria.
