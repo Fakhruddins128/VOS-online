@@ -1,91 +1,103 @@
 # VOS Deployment Guide
 
 ## Current Setup
-- **Backend**: Deployed on Render.com at `https://voslive-1.onrender.com`
-- **Frontend**: Ready for Vercel deployment
+- **Backend**: Node.js/Express API (example: Render.com)
+- **Frontend**: React/Vite app (example: Vercel)
 
-## Steps to Fix the Connection
+## Environment Variables
 
-### 1. ✅ Frontend Configuration (COMPLETED)
-The frontend environment variables have been updated to connect to your Render.com backend:
+### Frontend (Vercel / local)
+Set `VITE_API_BASE_URL` to your backend base URL:
 ```
 VITE_API_BASE_URL=https://voslive-1.onrender.com
 ```
 
-### 2. ✅ Backend CORS Configuration (COMPLETED)
-The backend now allows requests from:
-- All Vercel domains (`*.vercel.app`)
-- Localhost for development
-- Any specific production domains you add
+### Backend (Render / local)
 
-### 3. ✅ Frontend Build (COMPLETED)
-The frontend has been rebuilt with the correct API URL.
+#### Server
+```
+PORT=5000
+NODE_ENV=production
+FRONTEND_URL=https://your-app.vercel.app
+ALLOWED_ORIGINS=https://your-custom-domain.com,https://another-domain.com
+```
 
-## Next Steps for You
+`FRONTEND_URL` and `ALLOWED_ORIGINS` must be exact origins (scheme + host + optional port), for example `https://your-app.vercel.app`.
 
-### Deploy to Vercel
-1. **Push your changes to GitHub**:
-   ```bash
-   git add .
-   git commit -m "Update API URL for production deployment"
-   git push origin main
-   ```
+#### Database (SQL Server)
+```
+DB_SERVER=...
+DB_DATABASE=...
+DB_USER=...
+DB_PASSWORD=...
+DB_PORT=1433
+DB_ENCRYPT=true
+DB_TRUST_SERVER_CERTIFICATE=true
+```
 
-2. **Redeploy on Vercel**:
-   - Go to your Vercel dashboard
-   - Find your VOS project
-   - Click "Redeploy" or it will auto-deploy from GitHub
+#### Email (Forgot Password)
+The backend can send a new temporary password using SMTP via Nodemailer.
+```
+EMAIL_SERVICE=gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+EMAIL_FROM=your-email@gmail.com
+```
 
-### Deploy Backend Changes to Render.com
-1. **Push backend changes to GitHub**:
-   ```bash
-   git add .
-   git commit -m "Update CORS for Vercel deployment"
-   git push origin main
-   ```
+If `EMAIL_USER` and `EMAIL_PASS` are not set, the backend runs in a development fallback mode where the temporary password is logged to the backend console instead of being emailed.
 
-2. **Redeploy on Render.com**:
-   - Go to your Render.com dashboard
-   - Find your backend service
-   - Click "Manual Deploy" or it will auto-deploy from GitHub
+## Local Development
 
-## Testing the Connection
+### Start Backend
+From `backend/`:
+```bash
+npm install
+npm run dev
+```
 
-After both deployments are complete:
+Backend default URL: `http://localhost:5000`
 
-1. **Visit your Vercel URL** (e.g., `https://your-app.vercel.app`)
-2. **Open browser developer tools** (F12)
-3. **Try to login or access any API feature**
-4. **Check the Network tab** to see if API calls are successful
+### Start Frontend
+From `frontend/`:
+```bash
+npm install
+npm run dev
+```
+
+Frontend default URL: `http://localhost:5173`
+
+## Deployment (Vercel + Render)
+
+### Deploy Frontend to Vercel
+1. In Vercel Project Settings → Environment Variables, set:
+   - `VITE_API_BASE_URL=https://your-render-service.onrender.com`
+2. Deploy / redeploy the project.
+
+### Deploy Backend to Render
+1. In Render Service Settings → Environment Variables, set backend values:
+   - `FRONTEND_URL=https://your-vercel-app.vercel.app`
+   - Add any other origins to `ALLOWED_ORIGINS` (comma-separated)
+   - Add database values (`DB_*`)
+   - Add email values (`EMAIL_*`) to enable Forgot Password emailing
+2. Deploy / redeploy the service.
+
+## Testing
+
+### Health Check
+Test backend directly:
+`https://your-render-service.onrender.com/health`
+
+### Forgot Password
+Frontend calls:
+- `POST /api/users/forgot-password`
+
+If email is configured, a temporary password is sent to the vendor’s email. Otherwise the password is logged on the backend server console (development fallback).
 
 ## Troubleshooting
 
-### If you still see CORS errors:
-1. Check the browser console for the exact error
-2. Verify your Vercel domain is included in the CORS configuration
-3. Make sure both frontend and backend deployments are complete
+### CORS Errors
+- Ensure `FRONTEND_URL` matches your deployed frontend origin exactly.
+- Add additional origins to `ALLOWED_ORIGINS` (comma-separated).
 
-### If API calls fail:
-1. Test the backend directly: `https://voslive-1.onrender.com/health`
-2. Check if the backend is sleeping (Render.com free tier sleeps after inactivity)
-3. Verify the API endpoints are working
-
-### Common Issues:
-- **Backend sleeping**: Render.com free tier sleeps after 15 minutes of inactivity
-- **Environment variables**: Make sure Vercel has the correct environment variables
-- **Build cache**: Clear Vercel build cache if needed
-
-## Environment Variables for Vercel
-
-Make sure these are set in your Vercel project settings:
-```
-VITE_API_BASE_URL=https://voslive-1.onrender.com
-VITE_APP_NAME=VOS - Vendor Ordering System
-VITE_APP_VERSION=1.0.0
-```
-
-## Success Indicators
-- ✅ Frontend loads without errors
-- ✅ Login functionality works
-- ✅ API calls return data (not CORS errors)
-- ✅ All pages load correctly
+### Backend Sleeping (Render Free Tier)
+- Some hosts sleep services after inactivity. Wake the backend by hitting `/health` before testing the frontend.

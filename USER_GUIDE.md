@@ -5,6 +5,7 @@ Welcome to the Vendor Portal User Guide. This document provides step-by-step ins
 ## Table of Contents
 1. [Getting Started](#getting-started)
 2. [Login](#login)
+   - [Forgot Password](#forgot-password)
 3. [Dashboard](#dashboard)
 4. [Managing Orders](#managing-orders)
    - [Pending Orders](#pending-orders)
@@ -33,6 +34,17 @@ Welcome to the Vendor Portal User Guide. This document provides step-by-step ins
 
 > **Note:** If you enter incorrect credentials, an error message will appear. Please ensure your email and password are correct.
 
+### Forgot Password
+
+If you forgot your password, you can request a new one:
+
+1. On the Login screen, click **Forgot Password?**
+2. Enter your **Business Email**.
+3. Click **Reset Password**.
+4. A new temporary password is generated and sent to your email.
+
+After login, change your temporary password from **Change Password**.
+
 ---
 
 ## Dashboard
@@ -60,6 +72,7 @@ Navigate to the **Pending Orders** page via the sidebar menu. This section lists
 - **Sort:** Click on column headers (e.g., Order No) to sort the list in Ascending or Descending order.
 - **Pagination:** Use the page numbers at the bottom to navigate through large lists of orders.
 - **View Images:** If an order has an associated image, click the image icon/button to view a larger version of the product image along with its description and item code.
+- **Print:** Click **Print** to print the current list as shown (current sort and current page selection).
 
 ### Purchase Order Drafts
 
@@ -74,6 +87,7 @@ Navigate to the **Purchase Order Draft** page via the sidebar menu.
   - Finish Product
 - **View Details:** Browse the list of draft orders for the selected category.
 - **View Images:** Similar to pending orders, you can click on available images to view product details.
+- **Print:** Click **Print** to print the current category list as shown.
 
 ---
 
@@ -105,6 +119,11 @@ It is recommended to update your password periodically for security.
 ### Login Failed
 - **Invalid Email or Password:** Double-check your credentials. Ensure Caps Lock is off.
 - **Network Error:** Check your internet connection.
+
+### Forgot Password Email Not Received
+- Check your spam/junk folder.
+- Verify you entered the same **Business Email** that is registered.
+- If email delivery is not available in your environment, contact the administrator to retrieve the temporary password.
 
 ### No Data Visible
 - If you see no orders in "Pending Orders" or "Purchase Order Drafts," it means there are currently no records associated with your account for the selected criteria.
