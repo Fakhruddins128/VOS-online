@@ -31,7 +31,9 @@ const corsOptions = {
       'http://localhost:5174',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5173',
-      'http://127.0.0.1:5174'
+      'http://127.0.0.1:5174',
+      'https://www.vendorserp.com',
+      'https://vendorserp.com'
     ];
 
     const envOrigins = parseOrigins(process.env.ALLOWED_ORIGINS);
