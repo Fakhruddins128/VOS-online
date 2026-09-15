@@ -26,6 +26,7 @@ function AppContent() {
 
   return (
     <div className="app">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
       <div className={`app-layout ${!shouldShowSidebar ? 'no-sidebar' : ''}`}>
         {shouldShowSidebar && (
           <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
@@ -35,7 +36,7 @@ function AppContent() {
             toggleSidebar={shouldShowSidebar ? toggleSidebar : null} 
             showSidebarToggle={shouldShowSidebar}
           />
-          <main className="main-content">
+          <main className="main-content" id="main-content" tabIndex={-1}>
             <Routes>
               <Route path="/" element={<Login />} />
               <Route path="/login" element={<Login />} />

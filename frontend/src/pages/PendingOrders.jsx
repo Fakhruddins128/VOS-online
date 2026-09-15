@@ -1,13 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import Icon from '../components/Icon';
 import './PendingOrders.css';
 
 const PendingOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   
   // Pagination state
@@ -21,6 +20,8 @@ const PendingOrders = () => {
   const [sortOrder, setSortOrder] = useState('DESC');
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const imageTriggerRef = useRef(null);
+  const modalCloseBtnRef = useRef(null);
   
 
 
@@ -84,6 +85,17 @@ const PendingOrders = () => {
     }
     setCurrentPage(1); // Reset to first page when sorting
   };
+
+  const renderSortableHeader = (label, column) => (
+    <th
+      scope="col"
+      aria-sort={sortBy === column ? (sortOrder === 'ASC' ? 'ascending' : 'descending') : 'none'}
+    >
+      <button type="button" className="sortable" onClick={() => handleSort(column)}>
+        {label} {sortBy === column && (sortOrder === 'ASC' ? '↑' : '↓')}
+      </button>
+    </th>
+  );
   
   // Handle filtering
   
@@ -98,6 +110,7 @@ const PendingOrders = () => {
   // Handle image button click
   const handleImageClick = (order) => {
     if (order.Imagepath && order.Picture) {
+      imageTriggerRef.current = document.activeElement;
       const imageUrl = `${order.Imagepath}${order.Picture}`;
       setSelectedImage({
         url: imageUrl,
@@ -112,7 +125,22 @@ const PendingOrders = () => {
   const closeImageModal = () => {
     setShowImageModal(false);
     setSelectedImage(null);
+    imageTriggerRef.current?.focus?.();
   };
+
+  useEffect(() => {
+    if (!showImageModal) return undefined;
+    modalCloseBtnRef.current?.focus();
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowImageModal(false);
+        setSelectedImage(null);
+        imageTriggerRef.current?.focus?.();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showImageModal]);
   
   const handleLimitChange = (newLimit) => {
     setLimit(newLimit);
@@ -218,10 +246,12 @@ const PendingOrders = () => {
         <header className="pending-orders-header">
           <h1>Pending Orders</h1>
           <button onClick={fetchPendingOrders} className="refresh-btn">
-            🔄 Refresh
+            <Icon name="refreshCw" size={18} />
+            Refresh
           </button>
           <button onClick={printOrders} className="refresh-btn" style={{ marginLeft: '8px' }}>
-            🖨️ Print
+            <Icon name="printer" size={18} />
+            Print
           </button>
         </header>
 
@@ -231,6 +261,7 @@ const PendingOrders = () => {
             value={limit}
             onChange={(e) => handleLimitChange(parseInt(e.target.value))}
             className="limit-select"
+            aria-label="Rows per page"
           >
             <option value={10}>10 per page</option>
             <option value={25}>25 per page</option>
@@ -243,42 +274,17 @@ const PendingOrders = () => {
           <table className="orders-table">
             <thead>
               <tr>
-               
-                <th onClick={() => handleSort('OrderNo')} className="sortable">
-                  Order No. {sortBy === 'OrderNo' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                <th onClick={() => handleSort('Date')} className="sortable">
-                  Date {sortBy === 'Date' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                <th onClick={() => handleSort('ItemCode')} className="sortable">
-                  Item Code {sortBy === 'ItemCode' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                
-                <th>Description</th>
-                
-                <th onClick={() => handleSort('Order')} className="sortable">
-                  Order {sortBy === 'Order' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                
-                <th>QC</th>
-               
-                <th onClick={() => handleSort('Pending')} className="sortable">
-                  Pending {sortBy === 'Pending' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-               
-                <th onClick={() => handleSort('DeliveryDate')} className="sortable">
-                  Delivery Date {sortBy === 'DeliveryDate' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                <th>Final Date</th>
-                <th onClick={() => handleSort('ClosingDays')} className="sortable">
-                  Closing Days {sortBy === 'ClosingDays' && (sortOrder === 'ASC' ? '↑' : '↓')}
-                </th>
-                <th>Image</th>
-                {/* <th>PR Status</th>
-                <th>Cost</th>
-                <th>Price</th>
-                <th>Last Receive</th>
-                <th>L_Receive</th> */}
+                {renderSortableHeader('Order No.', 'OrderNo')}
+                {renderSortableHeader('Date', 'Date')}
+                {renderSortableHeader('Item Code', 'ItemCode')}
+                <th scope="col">Description</th>
+                {renderSortableHeader('Order', 'Order')}
+                <th scope="col">QC</th>
+                {renderSortableHeader('Pending', 'Pending')}
+                {renderSortableHeader('Delivery Date', 'DeliveryDate')}
+                <th scope="col">Final Date</th>
+                {renderSortableHeader('Closing Days', 'ClosingDays')}
+                <th scope="col">Image</th>
               </tr>
             </thead>
             <tbody>
@@ -310,13 +316,14 @@ const PendingOrders = () => {
                       {order.ClosingDays}
                     </td>
                     <td>
-                      <button 
+                      <button
                         className="image-btn"
                         onClick={() => handleImageClick(order)}
                         disabled={!order.Imagepath || !order.Picture}
                         title={order.Imagepath && order.Picture ? 'View Product Image' : 'No image available'}
+                        aria-label={order.Imagepath && order.Picture ? 'View product image' : 'No image available'}
                       >
-                        📷
+                        <Icon name="image" size={16} />
                       </button>
                     </td>
                     {/* <td>{order['PR Status']}</td>
@@ -334,10 +341,18 @@ const PendingOrders = () => {
         {/* Image Modal */}
         {showImageModal && selectedImage && (
           <div className="image-modal-overlay" onClick={closeImageModal}>
-            <div className="image-modal" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="image-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="image-modal-title"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="image-modal-header">
-                <h3>Product Image</h3>
-                <button className="close-btn" onClick={closeImageModal}>×</button>
+                <h3 id="image-modal-title">Product Image</h3>
+                <button className="close-btn" onClick={closeImageModal} aria-label="Close" ref={modalCloseBtnRef}>
+                  <Icon name="x" size={20} />
+                </button>
               </div>
               <div className="image-modal-content">
                 <img 

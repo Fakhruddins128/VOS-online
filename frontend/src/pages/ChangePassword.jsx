@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { userAPI } from '../services/api';
+import Icon from '../components/Icon';
 
 const passwordPolicy = {
   minLength: 8,
@@ -22,6 +23,9 @@ const ChangePassword = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [showOld, setShowOld] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [validations, setValidations] = useState({
     length: false,
     upper: false,
@@ -109,30 +113,52 @@ const ChangePassword = () => {
           <form onSubmit={handleSubmit} className="dynamics-form">
             <div className="dynamics-form-group">
               <label htmlFor="oldPassword" className="dynamics-label">Current Password</label>
-              <input
-                type="password"
-                id="oldPassword"
-                name="oldPassword"
-                value={formData.oldPassword}
-                onChange={handleChange}
-                required
-                className="dynamics-input"
-                placeholder="Enter current password"
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showOld ? 'text' : 'password'}
+                  id="oldPassword"
+                  name="oldPassword"
+                  value={formData.oldPassword}
+                  onChange={handleChange}
+                  required
+                  className="dynamics-input"
+                  placeholder="Enter current password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowOld((prev) => !prev)}
+                  aria-label={showOld ? 'Hide current password' : 'Show current password'}
+                  aria-pressed={showOld}
+                >
+                  <Icon name={showOld ? 'eyeOff' : 'eye'} size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="dynamics-form-group">
               <label htmlFor="newPassword" className="dynamics-label">New Password</label>
-              <input
-                type="password"
-                id="newPassword"
-                name="newPassword"
-                value={formData.newPassword}
-                onChange={handleChange}
-                required
-                className="dynamics-input"
-                placeholder="Enter new password"
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showNew ? 'text' : 'password'}
+                  id="newPassword"
+                  name="newPassword"
+                  value={formData.newPassword}
+                  onChange={handleChange}
+                  required
+                  className="dynamics-input"
+                  placeholder="Enter new password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowNew((prev) => !prev)}
+                  aria-label={showNew ? 'Hide new password' : 'Show new password'}
+                  aria-pressed={showNew}
+                >
+                  <Icon name={showNew ? 'eyeOff' : 'eye'} size={20} />
+                </button>
+              </div>
               <div className="dynamics-text-xs dynamics-mt-2">
                 <p>Password requirements:</p>
                 <ul className="dynamics-list dynamics-mt-1">
@@ -148,16 +174,27 @@ const ChangePassword = () => {
 
             <div className="dynamics-form-group">
               <label htmlFor="confirmPassword" className="dynamics-label">Confirm New Password</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                className="dynamics-input"
-                placeholder="Re-enter new password"
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                  className="dynamics-input"
+                  placeholder="Re-enter new password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowConfirm((prev) => !prev)}
+                  aria-label={showConfirm ? 'Hide confirm password' : 'Show confirm password'}
+                  aria-pressed={showConfirm}
+                >
+                  <Icon name={showConfirm ? 'eyeOff' : 'eye'} size={20} />
+                </button>
+              </div>
               <p className="dynamics-text-xs dynamics-mt-1" style={{ color: validations.match ? 'green' : 'inherit' }}>
                 {validations.match ? 'Passwords match' : 'Passwords must match'}
               </p>
@@ -174,12 +211,19 @@ const ChangePassword = () => {
           </form>
 
           {error && (
-            <div className="dynamics-bg-error dynamics-text-inverse dynamics-rounded-md dynamics-p-3 dynamics-mt-4">
+            <div
+              className="dynamics-bg-error dynamics-text-inverse dynamics-rounded-md dynamics-p-3 dynamics-mt-4"
+              role="alert"
+            >
               {error}
             </div>
           )}
           {message && (
-            <div className="dynamics-bg-success dynamics-text-inverse dynamics-rounded-md dynamics-p-3 dynamics-mt-4">
+            <div
+              className="dynamics-bg-success dynamics-text-inverse dynamics-rounded-md dynamics-p-3 dynamics-mt-4"
+              role="status"
+              aria-live="polite"
+            >
               {message}
             </div>
           )}

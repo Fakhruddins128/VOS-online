@@ -1,24 +1,15 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import Icon from './Icon';
 import './Sidebar.css';
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const { user } = useAuth?.() || { user: null };
-
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: '📊' },
-    { id: 'pending-orders', label: 'Pending Orders', path: '/pending-orders', icon: '🕒' },
-    { id: 'purchase-order-draft', label: 'Purchase Order Draft', path: '/purchase-order-draft', icon: '📝' },
-    { id: 'change-password', label: 'Change Password', path: '/change-password', icon: '🔑' },
+    { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: 'grid' },
+    { id: 'pending-orders', label: 'Pending Orders', path: '/pending-orders', icon: 'clipboardList' },
+    { id: 'purchase-order-draft', label: 'Purchase Order Draft', path: '/purchase-order-draft', icon: 'fileText' },
+    { id: 'change-password', label: 'Change Password', path: '/change-password', icon: 'key' },
   ];
-
-  const getAvatarText = () => {
-    const name = user?.VendorName || user?.ContactPerson || '';
-    const email = user?.BusinessEmail || '';
-    const source = name || email;
-    return source ? source.charAt(0).toUpperCase() : 'V';
-  };
 
   return (
     <>
@@ -38,7 +29,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
            
           </div>
           <button className="sidebar-close" onClick={toggleSidebar} aria-label="Close Sidebar">
-            ✕
+            <Icon name="x" size={20} />
           </button>
         </div>
 
@@ -51,7 +42,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                   className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                   onClick={toggleSidebar}
                 >
-                  <span className="nav-icon" aria-hidden="true">{item.icon}</span>
+                  <span className="nav-icon" aria-hidden="true"><Icon name={item.icon} size={18} /></span>
                   <span className="nav-text">{item.label}</span>
                 </NavLink>
               </li>

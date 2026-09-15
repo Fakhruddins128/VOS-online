@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Icon from './Icon';
 import './Login.css';
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
     BusinessEmail: '',
     password: ''
   });
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
@@ -67,12 +69,6 @@ const Login = () => {
     }
   };
 
-  const handleLogout = () => {
-    setUser(null);
-    setMessage('');
-    navigate('/login');
-  };
-
   return (
     <div className="login-container dynamics-bg-canvas dynamics-flex dynamics-items-center dynamics-justify-center">
       <div className="login-card dynamics-card dynamics-shadow-xl">
@@ -108,16 +104,27 @@ const Login = () => {
             
             <div className="dynamics-form-group">
               <label htmlFor="password" className="dynamics-label">Password</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-                placeholder="Enter your password"
-                className="dynamics-input"
-              />
+              <div className="password-wrapper">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your password"
+                  className="dynamics-input"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
+                >
+                  <Icon name={showPassword ? 'eyeOff' : 'eye'} size={20} />
+                </button>
+              </div>
             </div>
 
             <div className="dynamics-text-right dynamics-mb-4">

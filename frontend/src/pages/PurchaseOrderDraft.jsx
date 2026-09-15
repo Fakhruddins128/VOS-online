@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import Icon from '../components/Icon';
 import './PurchaseOrderDraft.css';
 
 const PurchaseOrderDraft = () => {
@@ -13,6 +14,8 @@ const PurchaseOrderDraft = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const imageTriggerRef = useRef(null);
+  const modalCloseBtnRef = useRef(null);
 
   const categories = [
     { value: 'Material', label: 'Material' },
@@ -87,6 +90,7 @@ const PurchaseOrderDraft = () => {
 
    const handleImageClick = (order) => {
     if (order.Imagepath && order.Picture) {
+      imageTriggerRef.current = document.activeElement;
       const imageUrl = `${order.Imagepath}${order.Picture}`;
       setSelectedImage({
         url: imageUrl,
@@ -100,7 +104,22 @@ const PurchaseOrderDraft = () => {
   const closeImageModal = () => {
     setShowImageModal(false);
     setSelectedImage(null);
+    imageTriggerRef.current?.focus?.();
   };
+
+  useEffect(() => {
+    if (!showImageModal) return undefined;
+    modalCloseBtnRef.current?.focus();
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setShowImageModal(false);
+        setSelectedImage(null);
+        imageTriggerRef.current?.focus?.();
+      }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [showImageModal]);
 
   const handleRefresh = () => {
     fetchPurchaseOrderDraft(selectedCategory);
@@ -192,10 +211,12 @@ const PurchaseOrderDraft = () => {
         <header className="purchase-order-draft-header">
           <h1>Purchase Order Draft</h1>
           <button onClick={handleRefresh} className="refresh-btn" disabled={loading}>
-            🔄 Refresh
+            <Icon name="refreshCw" size={18} />
+            Refresh
           </button>
           <button onClick={printDrafts} className="refresh-btn" style={{ marginLeft: '8px' }} disabled={loading}>
-            🖨️ Print
+            <Icon name="printer" size={18} />
+            Print
           </button>
         </header>
 
@@ -249,10 +270,18 @@ const PurchaseOrderDraft = () => {
          {/* Image Modal */}
         {showImageModal && selectedImage && (
           <div className="image-modal-overlay" onClick={closeImageModal}>
-            <div className="image-modal" onClick={(e) => e.stopPropagation()}>
+            <div
+              className="image-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="image-modal-title"
+              onClick={(e) => e.stopPropagation()}
+            >
               <div className="image-modal-header">
-                <h3>Product Image</h3>
-                <button className="close-btn" onClick={closeImageModal}>×</button>
+                <h3 id="image-modal-title">Product Image</h3>
+                <button className="close-btn" onClick={closeImageModal} aria-label="Close" ref={modalCloseBtnRef}>
+                  <Icon name="x" size={20} />
+                </button>
               </div>
               <div className="image-modal-content">
                 <img 
@@ -281,14 +310,14 @@ const PurchaseOrderDraft = () => {
             <table className="orders-table">
               <thead>
                 <tr>
-                  <th>Vendor</th>
-                  <th>Order No.</th>
-                  <th>Order Date</th>
-                  <th>Item Code</th>
-                  <th>Old Code</th>
-                  <th>Description</th>
-                  <th>Reserve Qty</th>
-                  <th>Image</th>
+                  <th scope="col">Vendor</th>
+                  <th scope="col">Order No.</th>
+                  <th scope="col">Order Date</th>
+                  <th scope="col">Item Code</th>
+                  <th scope="col">Old Code</th>
+                  <th scope="col">Description</th>
+                  <th scope="col">Reserve Qty</th>
+                  <th scope="col">Image</th>
                 </tr>
               </thead>
               <tbody>
@@ -309,13 +338,14 @@ const PurchaseOrderDraft = () => {
                       <td className="description">{order.Description}</td>
                       <td className="reserve-qty">{order.ReserveQty}</td>
                       <td>
-                      <button 
+                      <button
                         className="image-btn"
                         onClick={() => handleImageClick(order)}
                         disabled={!order.Imagepath || !order.Picture}
                         title={order.Imagepath && order.Picture ? 'View Product Image' : 'No image available'}
+                        aria-label={order.Imagepath && order.Picture ? 'View product image' : 'No image available'}
                       >
-                        📷
+                        <Icon name="image" size={16} />
                       </button>
                     </td>
                     </tr>

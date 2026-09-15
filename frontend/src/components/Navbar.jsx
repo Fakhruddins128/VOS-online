@@ -1,13 +1,14 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import Icon from './Icon';
 import './Navbar.css';
 
 const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated, logout, user } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
 
   const handleLogout = () => {
     logout();
@@ -16,8 +17,8 @@ const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
   };
 
   const navItems = isAuthenticated 
-    ? [{ action: 'logout', label: 'Logout', icon: '🚪' }]
-    : [{ path: '/login', label: 'Login', icon: '🔐' }];
+    ? [{ action: 'logout', label: 'Logout', icon: 'logOut' }]
+    : [{ path: '/login', label: 'Login', icon: 'logIn' }];
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -57,7 +58,7 @@ const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
                     className="nav-link dynamics-btn dynamics-btn-outline logout-btn"
                     onClick={handleLogout}
                   >
-                    <span className="nav-icon">{item.icon}</span>
+                    <Icon name={item.icon} size={20} className="nav-icon" />
                     <span className="nav-text">{item.label}</span>
                   </button>
                 ) : (
@@ -68,7 +69,7 @@ const Navbar = ({ toggleSidebar, showSidebarToggle = true }) => {
                     }`}
                     onClick={closeMenu}
                   >
-                    <span className="nav-icon">{item.icon}</span>
+                    <Icon name={item.icon} size={20} className="nav-icon" />
                     <span className="nav-text">{item.label}</span>
                   </Link>
                 )}

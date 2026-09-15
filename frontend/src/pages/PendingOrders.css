@@ -220,6 +220,16 @@
 
 /* Sortable Headers */
 .sortable {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
   cursor: pointer;
   user-select: none;
   transition: all 0.3s ease;
@@ -227,6 +237,11 @@
 
 .sortable:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.sortable:focus-visible {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
 /* Pagination */

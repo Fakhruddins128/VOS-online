@@ -44,3 +44,24 @@ Append a dated entry here for every meaningful future change, including:
 - database changes
 - security changes
 - deployment/configuration changes
+
+## 2026-09-15 — Frontend accessibility pass
+- Added `frontend/src/components/Icon.jsx`: an inline-SVG icon component (stroke-based, 24×24 outline family) with no new dependencies. Icons render `aria-hidden="true"` and `focusable="false"`.
+- Replaced all emoji icons with the Icon component:
+  - Sidebar menu (grid, clipboard-list, file-text, key), sidebar close (X), navbar login/logout (sign-in, sign-out).
+  - Pending Orders and Purchase Order Draft refresh/print buttons and product-image buttons.
+- Made sortable table headers keyboard-operable: headers in `PendingOrders` now are real `<button>` elements inside `<th>` with `scope="col"` and `aria-sort`.
+- Added `aria-label` to icon-only image buttons and the rows-per-page select; added `scope="col"` to all remaining table headers.
+- Image modals (`PendingOrders`, `PurchaseOrderDraft`): added `role="dialog"`, `aria-modal`, `aria-labelledby`, Escape-to-close, initial focus on the close button, and focus return to the triggering button.
+- Added show/hide password visibility toggles (eye/eye-off) to `Login` and `ChangePassword`, with `aria-label`/`aria-pressed`.
+- Removed dead `handleLogout` in `Login.jsx` (referenced an undefined `setUser` and would have thrown).
+- Added a "Skip to main content" link and `id="main-content"` on `<main>` in `App.jsx`.
+- `App.css`: global `:focus-visible` rings, `.skip-link`, `.password-wrapper` / `.password-toggle` styles, and a `prefers-reduced-motion: reduce` block that limits animation/transition.
+- `PendingOrders.css`: restyled `.sortable` for its new `<button>` context and added a high-contrast white `:focus-visible` ring on the gradient table header.
+- Lint/build cleanup along the way (no behavior change): removed unused `user`, `navigate`, `getAvatarText`, `logout`, `useState`, and an unused `error` binding in `Navbar`, `Sidebar`, `PendingOrders`, `Dashboard`, `Home`.
+- Verification: `npm run build` passes. `npm run lint` reports only pre-existing issues: `AuthContext.jsx` triggers `react-refresh/only-export-components` (structural — `useAuth` hook exported from a component file; refactor deferred as out of scope) and two `react-hooks/exhaustive-deps` warnings for the data-fetch effects in `PendingOrders` and `PurchaseOrderDraft` (pre-existing; avoiding a `useCallback` refactor of working fetch code).
+
+### Manual test suggestions
+- Keyboard: Tab through sidebar/nav, sort headers (Enter toggles sort), open image modal (focus lands on close), press Escape (focus returns to the image button).
+- Password fields: eye toggle shows/hides text and announces via `aria-pressed`.
+- With OS reduced-motion enabled, animations/spinners are effectively disabled.

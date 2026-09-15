@@ -15,7 +15,7 @@ const Home = () => {
     try {
       const response = await generalAPI.testConnection();
       setDbStatus(response);
-    } catch (error) {
+    } catch {
       setDbStatus({ success: false, message: 'Connection failed' });
     } finally {
       setLoading(false);

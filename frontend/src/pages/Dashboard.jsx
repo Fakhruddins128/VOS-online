@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useEffect(() => {
     // Redirect to login if not authenticated
@@ -13,11 +13,6 @@ const Dashboard = () => {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   if (!user) {
     return <div>Loading...</div>;
