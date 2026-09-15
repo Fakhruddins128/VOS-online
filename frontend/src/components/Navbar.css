@@ -135,7 +135,7 @@
 .navbar-menu .logout-btn {
   color: rgba(255, 255, 255, 0.9);
   border-color: rgba(255, 255, 255, 0.2);
-  background: transparent;
+  background: #0078d4;
   cursor: pointer;
   font-family: inherit;
   font-size: var(--dynamics-font-size-sm);
