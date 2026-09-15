@@ -14,20 +14,22 @@ const PendingOrders = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalRecords, setTotalRecords] = useState(0);
   const [limit, setLimit] = useState(10);
-  
-  // Sorting state
+// Sorting state
   const [sortBy, setSortBy] = useState('OrderNo');
   const [sortOrder, setSortOrder] = useState('DESC');
+  
+  // Search state
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const imageTriggerRef = useRef(null);
   const modalCloseBtnRef = useRef(null);
   
 
-
   useEffect(() => {
     fetchPendingOrders();
-  }, [currentPage, limit, sortBy, sortOrder, user, isAuthenticated]);
+  }, [currentPage, limit, sortBy, sortOrder, search, user, isAuthenticated]);
 
   const fetchPendingOrders = async () => {
     try {
@@ -48,6 +50,9 @@ const PendingOrders = () => {
         sortOrder,
         vendorId: user.ID.toString()
       });
+      if (search) {
+        queryParams.append('search', search);
+      }
       
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const response = await fetch(`${API_BASE_URL}/api/pending-orders?${queryParams}`);
@@ -84,6 +89,19 @@ const PendingOrders = () => {
       setSortOrder('ASC');
     }
     setCurrentPage(1); // Reset to first page when sorting
+  };
+
+  // Handle search
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    setSearch(searchInput.trim());
+    setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearch('');
+    setCurrentPage(1);
   };
 
   const renderSortableHeader = (label, column) => (
@@ -255,8 +273,26 @@ const PendingOrders = () => {
           </button>
         </header>
 
-        {/* Pagination Controls */}
-        <div className="pagination-controls-top">
+        {/* Search & Toolbar */}
+        <div className="orders-toolbar">
+          <form className="search-form" onSubmit={handleSearchSubmit}>
+            <input
+              type="search"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              placeholder="Search by Order No. or Item Code..."
+              className="search-input"
+              aria-label="Search by order number or item code"
+            />
+            <button type="submit" className="search-btn" disabled={loading}>
+              <Icon name="search" size={16} />
+            </button>
+            {search && (
+              <button type="button" className="search-clear" onClick={handleClearSearch}>
+                Clear
+              </button>
+            )}
+          </form>
           <select
             value={limit}
             onChange={(e) => handleLimitChange(parseInt(e.target.value))}

@@ -66,6 +66,18 @@ Append a dated entry here for every meaningful future change, including:
 - Password fields: eye toggle shows/hides text and announces via `aria-pressed`.
 - With OS reduced-motion enabled, animations/spinners are effectively disabled.
 
+## 2026-09-15 — Pending Orders search filter
+- Added search-by text filter to the Pending Orders page, matching on **Order No.** and **Item Code** (server-side).
+- `backend/routes/pendingOrders.js` (`GET /api/pending-orders`):
+  - New optional `search` query param. Main query wraps the UNION result with `WHERE ([Order #] LIKE @searchPattern OR [Item Code] LIKE @searchPattern)`; count query adds `OM.OrderNo LIKE @searchPattern OR (IM.ItemCode+'-'+M.M_Code+'-'+C.Code+'-'+F.Code) LIKE @searchPattern` to both UNION parts so pagination totals stay consistent.
+  - Parameterized with `%term%` — no user input is concatenated into SQL.
+- `frontend/src/pages/PendingOrders.jsx`:
+  - Toolbar row with a search input + search (magnifier) button and a Clear button next to the existing rows-per-page select.
+  - Search applies on submit/Enter or Clear, resets to page 1, and is appended to the request only when non-empty.
+- `frontend/src/components/Icon.jsx`: added the `search` (magnifier) icon.
+- `frontend/src/pages/PendingOrders.css`: `.orders-toolbar`, `.search-form`, `.search-input`, `.search-btn`, `.search-clear` plus responsive stacking on small screens.
+- Verification: backend `node --check` passes; stubbed-endpoint test confirms the main query filters, keeps `ORDER BY`/`OFFSET` pagination, the count query filters both UNION parts, and no-search requests produce unchanged SQL. Frontend `npm run build` and `npm run lint` pass (lint: only the pre-existing `AuthContext` error + 2 hook-dep warnings).
+
 ## 2026-09-15 — Forgot Password flow fixes
 - Root cause of "not working": backend `.env` had no `EMAIL_USER`/`EMAIL_PASS`, so `emailService` fell into dev-mode (logged the generated password to the server console, sent nothing) while the API still replied "New password sent to your email" — the old password was then destroyed in the DB and the vendor was locked out.
 - `backend/services/emailService.js`:

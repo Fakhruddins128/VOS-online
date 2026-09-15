@@ -15,7 +15,8 @@ router.get('/', async (req, res) => {
       limit = 10,
       sortBy = 'OrderNo',
       sortOrder = 'DESC',
-      vendorId
+      vendorId,
+      search = ''
     } = req.query;
     
 
@@ -127,6 +128,16 @@ AND OM.OrderStat!='Draft' AND C3.FK_Category2ID=C2.ID AND IM.FKSubGroupID=C3.ID 
     const sortColumn = validSortColumns[sortBy] || '[Order #]';
     const sortDirection = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
     
+    const searchPattern = `%${String(search).trim()}%`;
+    const searchClause = search
+      ? ` WHERE ([Order #] LIKE @searchPattern OR [Item Code] LIKE @searchPattern)`
+      : '';
+    const countSearchClause = search
+      ? ` AND (OM.OrderNo LIKE @searchPattern OR (IM.ItemCode+'-'+M.M_Code+'-'+C.Code+'-'+F.Code) LIKE @searchPattern)`
+      : '';
+    
+    baseQuery += searchClause;
+    
     baseQuery += ` ORDER BY ${sortColumn} ${sortDirection}`;
     
     // Add pagination
@@ -147,7 +158,7 @@ AND OM.OrderStat!='Draft' AND C3.FK_Category2ID=C2.ID AND IM.FKSubGroupID=C3.ID 
         AND Vd.FKMaterialID=M.ID 
         AND VD.FKColourID=C.ID 
         AND VD.FKFinishID=F.ID 
-        AND V.ID=@vendorId
+        AND V.ID=@vendorId${countSearchClause}
         AND (OD.OrderQty - OD.RcvdQty - OD.AutoClosedPenaltyQty) > 0 
         AND OD.Sales_Unit_ID=U.ID 
         AND OD.Status NOT LIKE 'Force Closed' 
@@ -168,7 +179,7 @@ AND OM.OrderStat!='Draft' AND C3.FK_Category2ID=C2.ID AND IM.FKSubGroupID=C3.ID 
         AND Vd.FKMaterialID=M.ID 
         AND VD.FKColourID=C.ID 
         AND VD.FKFinishID=F.ID 
-        AND V.ID=@vendorId
+        AND V.ID=@vendorId${countSearchClause}
         AND (OD.OrderQty - OD.RcvdQty - OD.AutoClosedPenaltyQty) = 0
         AND OD.InQCQty > 0
         AND OD.Sales_Unit_ID=U.ID 
@@ -181,8 +192,8 @@ AND OM.OrderStat!='Draft' AND C3.FK_Category2ID=C2.ID AND IM.FKSubGroupID=C3.ID 
     
     // Execute both queries
     const [result, countResult] = await Promise.all([
-      database.query(baseQuery, { vendorId: parseInt(vendorId) }),
-      database.query(countQuery, { vendorId: parseInt(vendorId) })
+      database.query(baseQuery, { vendorId: parseInt(vendorId), searchPattern }),
+      database.query(countQuery, { vendorId: parseInt(vendorId), searchPattern })
     ]);
     
     const totalRecords = countResult.recordset[0].total;

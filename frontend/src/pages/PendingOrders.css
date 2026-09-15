@@ -276,6 +276,98 @@
 }
 
 /* ============================================
+   Toolbar: Search + Pagination Controls
+   ============================================ */
+
+.orders-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--dynamics-space-3);
+  background: var(--dynamics-bg-primary);
+  padding: var(--dynamics-space-3) var(--dynamics-space-6);
+  border-radius: var(--dynamics-radius-lg);
+  border: 1px solid var(--dynamics-border-subtle);
+  box-shadow: var(--dynamics-shadow-depth-2);
+  margin-bottom: var(--dynamics-space-4);
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  gap: var(--dynamics-space-2);
+  flex: 1;
+  max-width: 420px;
+}
+
+.search-input {
+  flex: 1;
+  padding: var(--dynamics-space-2) var(--dynamics-space-3);
+  border: 1px solid var(--dynamics-border-medium);
+  border-radius: var(--dynamics-radius-md);
+  font-size: var(--dynamics-font-size-sm);
+  font-family: inherit;
+  color: var(--dynamics-text-primary);
+  background: var(--dynamics-bg-primary);
+  min-height: 36px;
+  transition: border-color var(--dynamics-transition-fast);
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--dynamics-primary);
+  box-shadow: 0 0 0 2px var(--dynamics-primary-light);
+}
+
+.search-input::placeholder {
+  color: var(--dynamics-text-tertiary);
+}
+
+.search-btn {
+  background: var(--dynamics-primary);
+  color: var(--dynamics-text-inverse);
+  border: none;
+  border-radius: var(--dynamics-radius-md);
+  cursor: pointer;
+  padding: var(--dynamics-space-2);
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--dynamics-transition-fast);
+}
+
+.search-btn:hover:not(:disabled) {
+  background: var(--dynamics-primary-hover);
+}
+
+.search-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.search-clear {
+  background: var(--dynamics-gray-100);
+  color: var(--dynamics-text-secondary);
+  border: 1px solid var(--dynamics-border-medium);
+  border-radius: var(--dynamics-radius-md);
+  cursor: pointer;
+  padding: var(--dynamics-space-2) var(--dynamics-space-3);
+  min-height: 36px;
+  font-size: var(--dynamics-font-size-sm);
+  font-family: inherit;
+  font-weight: 500;
+  transition: all var(--dynamics-transition-fast);
+  white-space: nowrap;
+}
+
+.search-clear:hover {
+  background: var(--dynamics-gray-200);
+  color: var(--dynamics-text-primary);
+}
+
+/* ============================================
    Pagination
    ============================================ */
 
@@ -571,6 +663,16 @@
     font-size: var(--dynamics-font-size-xl);
   }
 
+  .orders-toolbar {
+    flex-direction: column;
+    padding: var(--dynamics-space-3) var(--dynamics-space-4);
+    align-items: stretch;
+  }
+
+  .search-form {
+    max-width: 100%;
+  }
+
   .orders-table-container {
     overflow-x: auto;
     position: relative;
@@ -635,6 +737,26 @@
   .refresh-btn {
     padding: var(--dynamics-space-2) var(--dynamics-space-3);
     font-size: var(--dynamics-font-size-xs);
+  }
+
+  .orders-toolbar {
+    padding: var(--dynamics-space-2) var(--dynamics-space-3);
+  }
+
+  .search-input {
+    font-size: var(--dynamics-font-size-xs);
+    min-height: 32px;
+  }
+
+  .search-btn {
+    min-width: 32px;
+    min-height: 32px;
+  }
+
+  .search-clear {
+    min-height: 32px;
+    font-size: var(--dynamics-font-size-xs);
+    padding: var(--dynamics-space-1) var(--dynamics-space-2);
   }
 
   .orders-table {
