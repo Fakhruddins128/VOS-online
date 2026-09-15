@@ -4,34 +4,46 @@ require('dotenv').config();
 class EmailService {
   constructor() {
     // Check if email configuration exists
-    this.isConfigured = process.env.EMAIL_USER && process.env.EMAIL_PASS;
-    
+    this.isConfigured = Boolean(process.env.EMAIL_USER && process.env.EMAIL_PASS);
+
     if (this.isConfigured) {
-      this.transporter = nodemailer.createTransport({
-        service: process.env.EMAIL_SERVICE || 'gmail', // Default to gmail if not specified
-        host: process.env.EMAIL_HOST,
-        port: process.env.EMAIL_PORT || 587,
-        secure: process.env.EMAIL_SECURE === 'true',
+      const transportConfig = {
         auth: {
           user: process.env.EMAIL_USER,
           pass: process.env.EMAIL_PASS,
         },
-      });
+      };
+
+      if (process.env.EMAIL_SERVICE) {
+        // Named service (gmail, outlook, etc.) - nodemailer handles host/port/secure
+        transportConfig.service = process.env.EMAIL_SERVICE;
+      } else {
+        // Generic SMTP
+        transportConfig.host = process.env.EMAIL_HOST;
+        transportConfig.port = Number(process.env.EMAIL_PORT) || 587;
+        transportConfig.secure = process.env.EMAIL_SECURE === 'true';
+      }
+
+      this.transporter = nodemailer.createTransport(transportConfig);
     } else {
-      console.warn('Email service is not configured. Please set EMAIL_USER and EMAIL_PASS in .env');
+      console.warn('[emailService] Not configured. Set EMAIL_USER and EMAIL_PASS in backend/.env to send real emails.');
     }
   }
 
   async sendPasswordResetEmail(to, newPassword) {
     if (!this.isConfigured) {
-      console.log(`[DEV] Password reset for ${to}: New password is ${newPassword}`);
-      return { success: true, dev: true, message: 'Email not configured. New password logged to server.' };
+      console.warn(`[emailService][DEV] Password reset for ${to}: new password = ${newPassword} (email NOT sent - SMTP not configured)`);
+      return {
+        success: true,
+        dev: true,
+        message: 'SMTP not configured. Use the generated password below to sign in (development only).',
+      };
     }
 
     const mailOptions = {
       from: process.env.EMAIL_FROM || process.env.EMAIL_USER,
       to: to,
-      subject: 'Password Reset - Vendor Portal',
+      subject: 'Password Reset - VOS Online Vendor Portal',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Password Reset Request</h2>
@@ -41,16 +53,16 @@ class EmailService {
             ${newPassword}
           </div>
           <p>We recommend changing this password immediately after logging in.</p>
-          <p>Best regards,<br>Vendor Portal Team</p>
+          <p>Best regards,<br>VOS Online Vendor Portal Team</p>
         </div>
       `
     };
 
     try {
       await this.transporter.sendMail(mailOptions);
-      return { success: true };
+      return { success: true, dev: false };
     } catch (error) {
-      console.error('Email send error:', error);
+      console.error('[emailService] Email send error:', error.message);
       return { success: false, error: 'Failed to send email.' };
     }
   }

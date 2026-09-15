@@ -7,11 +7,13 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [isSuccess, setIsSuccess] = useState(false);
+  const [devPassword, setDevPassword] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setDevPassword('');
     setIsSuccess(false);
 
     try {
@@ -24,19 +26,23 @@ const ForgotPassword = () => {
         body: JSON.stringify({ BusinessEmail: email }),
       });
 
-      const data = await response.json();
+      let data = null;
+      try {
+        data = await response.json();
+      } catch {
+        // Non-JSON response
+      }
 
-      if (response.ok && data.success) {
+      if (response.ok && data?.success) {
         setIsSuccess(true);
-        if (data.dev) {
-          setMessage(data.message || 'New password generated. Check server logs for the password.');
+        if (data.dev && data.devPassword) {
+          setDevPassword(data.devPassword);
+          setMessage(data.message || 'Development mode: use the generated password below to sign in.');
         } else {
-          setMessage(data.message || 'New password sent to your email.');
+          setMessage(data.message || 'New password sent to your registered email.');
         }
-        // Optional: Redirect after a delay
-        // setTimeout(() => navigate('/login'), 5000);
       } else {
-        setMessage(data.error || 'Failed to reset password.');
+        setMessage(data?.error || 'Failed to reset password. Please try again.');
       }
     } catch (error) {
       setMessage('Network error. Please try again.');
@@ -51,7 +57,7 @@ const ForgotPassword = () => {
       <div className="login-card dynamics-card dynamics-shadow-xl">
         <div className="dynamics-card-header dynamics-text-center">
           <h2 className="dynamics-text-2xl dynamics-font-bold dynamics-mb-2">Forgot Password</h2>
-          <p className="dynamics-text-secondary">Enter your email to receive a new password</p>
+          <p className="dynamics-text-secondary">Enter your registered email to receive a new password</p>
         </div>
         
         <div className="dynamics-card-body">
@@ -59,8 +65,17 @@ const ForgotPassword = () => {
             <div
               className={`message ${isSuccess ? 'success' : 'error'} dynamics-p-4 dynamics-rounded-md dynamics-mb-4 ${isSuccess ? 'dynamics-bg-success dynamics-text-inverse' : 'dynamics-bg-error dynamics-text-inverse'}`}
               role="alert"
+              aria-live="assertive"
             >
               {message}
+            </div>
+          )}
+          
+          {isSuccess && devPassword && (
+            <div className="reset-password-box" aria-label="Temporary password">
+              <div className="reset-password-label">Your new password</div>
+              <div className="reset-password-value">{devPassword}</div>
+              <p className="reset-password-note">Please change this password after signing in.</p>
             </div>
           )}
           

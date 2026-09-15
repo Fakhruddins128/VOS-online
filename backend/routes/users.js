@@ -223,6 +223,35 @@ router.post('/change-password', async (req, res) => {
   }
 });
 
+// Generate a random password that satisfies the vendor password policy
+function generateRandomPassword(length = 12) {
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghijkmnopqrstuvwxyz';
+  const digits = '23456789';
+  const symbols = '@$!%*?&';
+  const all = upper + lower + digits + symbols;
+  const randomChar = (set) => set[crypto.randomInt(0, set.length)];
+
+  let password = '';
+  for (let i = 0; i < length; i += 1) {
+    password += randomChar(all);
+  }
+
+  // Guarantee at least one character from each required class
+  const ensure = (regex, set) => {
+    if (!regex.test(password)) {
+      const idx = crypto.randomInt(0, password.length);
+      password = password.slice(0, idx) + randomChar(set) + password.slice(idx + 1);
+    }
+  };
+  ensure(/[A-Z]/, upper);
+  ensure(/[a-z]/, lower);
+  ensure(/\d/, digits);
+  ensure(/[@$!%*?&]/, symbols);
+
+  return password;
+}
+
 // POST /api/users/forgot-password - Reset password and send to email
 router.post('/forgot-password', async (req, res) => {
   try {
@@ -238,9 +267,6 @@ router.post('/forgot-password', async (req, res) => {
     `, { BusinessEmail });
 
     if (result.recordset.length === 0) {
-      // For security, don't reveal that the user doesn't exist, or do reveal depending on policy.
-      // Usually generic message is better, but for internal tools explicit is okay.
-      // Let's go with explicit for this use case as it's a vendor portal.
       return res.status(404).json({ success: false, error: 'Email not registered' });
     }
 
@@ -251,9 +277,20 @@ router.post('/forgot-password', async (req, res) => {
     }
 
     // Generate new random password
-    const newPassword = crypto.randomBytes(4).toString('hex') + Math.floor(Math.random() * 1000); // e.g. "a1b2c3d4123"
+    const newPassword = generateRandomPassword();
     const salt = generateSalt();
     const hashedPassword = hashPassword(newPassword, salt);
+
+    // Send email BEFORE updating the password so a delivery failure
+    // does not lock the vendor out with a password they never received.
+    const emailResult = await emailService.sendPasswordResetEmail(BusinessEmail, newPassword);
+
+    if (!emailResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: 'Failed to send reset email. Please contact support.'
+      });
+    }
 
     // Update password in DB
     await database.query(`
@@ -261,22 +298,19 @@ router.post('/forgot-password', async (req, res) => {
       WHERE BusinessEmail = @BusinessEmail
     `, { Password: hashedPassword, Salt: salt, BusinessEmail });
 
-    // Send email
-    const emailResult = await emailService.sendPasswordResetEmail(BusinessEmail, newPassword);
-
-    if (emailResult.success) {
-      return res.json({ success: true, message: 'New password sent to your email.' });
-    } else {
-      return res.status(500).json({ 
-        success: false, 
-        error: 'Password reset but failed to send email. Please contact support.',
-        details: emailResult.error 
+    if (emailResult.dev) {
+      return res.json({
+        success: true,
+        dev: true,
+        devPassword: newPassword,
+        message: emailResult.message
       });
     }
 
+    return res.json({ success: true, message: 'New password sent to your email.' });
   } catch (error) {
     console.error('Error in forgot-password:', error);
-    return res.status(500).json({ success: false, error: 'Internal server error: ' + error.message });
+    return res.status(500).json({ success: false, error: 'Something went wrong. Please try again later.' });
   }
 });
 

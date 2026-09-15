@@ -128,7 +128,7 @@ const Login = () => {
             </div>
 
             <div className="dynamics-text-right dynamics-mb-4">
-              <Link to="/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--primary-color)' }}>
+              <Link to="/forgot-password" style={{ fontSize: '0.875rem', color: 'var(--dynamics-primary)' }}>
                 Forgot Password?
               </Link>
             </div>

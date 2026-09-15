@@ -65,3 +65,20 @@ Append a dated entry here for every meaningful future change, including:
 - Keyboard: Tab through sidebar/nav, sort headers (Enter toggles sort), open image modal (focus lands on close), press Escape (focus returns to the image button).
 - Password fields: eye toggle shows/hides text and announces via `aria-pressed`.
 - With OS reduced-motion enabled, animations/spinners are effectively disabled.
+
+## 2026-09-15 — Forgot Password flow fixes
+- Root cause of "not working": backend `.env` had no `EMAIL_USER`/`EMAIL_PASS`, so `emailService` fell into dev-mode (logged the generated password to the server console, sent nothing) while the API still replied "New password sent to your email" — the old password was then destroyed in the DB and the vendor was locked out.
+- `backend/services/emailService.js`:
+  - Robust transport config: named service (`EMAIL_SERVICE`, e.g. gmail/outlook) or generic SMTP (`EMAIL_HOST`/`EMAIL_PORT`/`EMAIL_SECURE`) instead of forcing `service` + `host` simultaneously.
+  - Dev fallback now returns an explicit `dev: true` + `message` instead of a misleading success, and warns clearly in the server log. No real credentials are ever logged.
+  - Email failure no longer returns a fake success (`success:false` only on actual failure).
+- `backend/routes/users.js` (`POST /api/users/forgot-password`):
+  - Sends the password email BEFORE updating the DB so a delivery failure cannot lock the vendor out (previously DB was updated first, then the email; the vendor's working password could be destroyed and the replacement never received).
+  - Generated reset password is now 12 chars and satisfies the vendor password policy (upper + lower + digit + symbol) via a new `generateRandomPassword()` helper using `crypto.randomInt`.
+  - Passes `dev`/`devPassword` through to the frontend in dev mode so the temporary password is visible in the UI instead of only in server logs.
+  - Generic 500 message (no internal error details leaked to the client).
+- `backend/.env`: added `EMAIL_SERVICE`, `EMAIL_USER`, `EMAIL_PASS`, `EMAIL_FROM`, `EMAIL_HOST`, `EMAIL_PORT`, `EMAIL_SECURE` placeholders (names only; values left empty for the owner to fill in).
+- `frontend/src/pages/ForgotPassword.jsx`: shows the dev-mode temporary password in a styled box, handles non-JSON/error responses, accurate success/error messages.
+- `frontend/src/components/Login.jsx` + `Login.css`: fixed the "Forgot Password?" link using the old `--primary-color` variable (undefined after the theme rewrite) → `--dynamics-primary`; added `.reset-password-box` styles.
+- Verification: frontend `npm run build` and `npm run lint` pass (lint reports only the pre-existing `AuthContext` refresh error + 2 hook-dep warnings). Backend `node --check` passes. Endpoint exercised locally with the SQL Server unavailable; the route fails safely with a generic 500. Logic validated with a stubbed DB/email harness: (a) email `dev` success → 200 with policy-compliant `devPassword`, queries were `SELECT` then `UPDATE`; (b) email failure → 500 and NO `UPDATE` (password not changed).
+- Note: real email delivery still requires the owner to fill `EMAIL_USER`/`EMAIL_PASS` (e.g. a Gmail app password) in `backend/.env` and for `DB_SERVER`/`DB_*` in `backend/.env` to point at a reachable SQL Server.
