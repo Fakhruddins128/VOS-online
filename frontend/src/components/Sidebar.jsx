@@ -24,9 +24,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <aside className={`sidebar ${isOpen ? 'sidebar-open' : ''}`} aria-label="Sidebar Navigation">
         <div className="sidebar-header">
           <div className="sidebar-brand">
-            <span className="brand-icon" aria-hidden="true"></span>
-            <span className="brand-text"> Vendor Enterprise Solution  </span>
-           
+            <span className="brand-icon" aria-hidden="true">V</span>
+            <span className="brand-text">VOS Online</span>
           </div>
           <button className="sidebar-close" onClick={toggleSidebar} aria-label="Close Sidebar">
             <Icon name="x" size={20} />
@@ -52,10 +51,9 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
         <div className="sidebar-footer">
           <div className="user-info" aria-label="User Info">
-            {/* <div className="user-avatar" aria-hidden="true">{getAvatarText()}</div> */}
             <div className="user-details">
-              <div className="user-name">VES Version 1.0.0 </div>
-              <div className="user-role">Team IT copyright 2025</div>
+              <div className="user-name">VES v1.0.0</div>
+              <div className="user-role">Team IT - 2025</div>
             </div>
           </div>
         </div>
