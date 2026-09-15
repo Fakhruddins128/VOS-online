@@ -1,18 +1,56 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
+import Icon from '../components/Icon';
 import './Dashboard.css';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const [pendingCount, setPendingCount] = useState(null);
+  const [draftCount, setDraftCount] = useState(null);
 
   useEffect(() => {
-    // Redirect to login if not authenticated
     if (!isAuthenticated) {
       navigate('/login');
+      return;
     }
-  }, [isAuthenticated, navigate]);
+
+    const fetchCounts = async () => {
+      if (!user?.ID) return;
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+
+      // Fetch pending orders count (limit=1 just to get totalRecords)
+      try {
+        const pendingRes = await fetch(
+          `${API_BASE_URL}/api/pending-orders?vendorId=${user.ID}&limit=1`
+        );
+        if (pendingRes.ok) {
+          const pendingData = await pendingRes.json();
+          setPendingCount(pendingData.pagination?.totalRecords ?? 0);
+        }
+      } catch {
+        setPendingCount(0);
+      }
+
+      // Fetch purchase order draft count (Material category default)
+      try {
+        const draftRes = await fetch(
+          `${API_BASE_URL}/api/purchase-order-draft?vendorId=${user.ID}&category=Material`
+        );
+        if (draftRes.ok) {
+          const draftData = await draftRes.json();
+          setDraftCount(draftData.count ?? draftData.data?.length ?? 0);
+        }
+      } catch {
+        setDraftCount(0);
+      }
+    };
+
+    fetchCounts();
+  }, [isAuthenticated, navigate, user?.ID]);
 
   if (!user) {
     return <div>Loading...</div>;
@@ -46,19 +84,28 @@ const Dashboard = () => {
             </div>
 
             <div className="dashboard-card">
-              <h3>Quick Actions</h3>
+              <h3>Pending Orders</h3>
               <div className="quick-actions">
-                {/* <button className="action-btn">Update Profile</button>
-                <button className="action-btn">View Reports</button>
-                <button className="action-btn">Settings</button> */}
-                <p><strong>Comming Soon</strong>  </p>
+                <div className="stat-value">
+                  {pendingCount !== null ? pendingCount : <span className="stat-loading">...</span>}
+                </div>
+                <div className="stat-label">pending orders created</div>
+                <Link to="/pending-orders" className="action-btn">
+                  <Icon name="list" size={16} /> View Pending Orders
+                </Link>
               </div>
             </div>
 
             <div className="dashboard-card">
-              <h3>Recent Activity</h3>
+              <h3>Purchase Order Draft</h3>
               <div className="activity-list">
-                <p>No recent activity to display.</p>
+                <div className="stat-value">
+                  {draftCount !== null ? draftCount : <span className="stat-loading">...</span>}
+                </div>
+                <div className="stat-label">draft orders available</div>
+                <Link to="/purchase-order-draft" className="action-btn">
+                  <Icon name="fileText" size={16} /> View Draft Orders
+                </Link>
               </div>
             </div>
 

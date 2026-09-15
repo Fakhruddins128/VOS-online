@@ -106,6 +106,26 @@
   font-weight: var(--dynamics-font-weight-semibold);
 }
 
+/* Stat Value */
+.stat-value {
+  font-size: var(--dynamics-font-size-3xl);
+  font-weight: var(--dynamics-font-weight-bold);
+  color: var(--dynamics-primary);
+  line-height: 1;
+  margin-bottom: var(--dynamics-space-2);
+}
+
+.stat-label {
+  font-size: var(--dynamics-font-size-sm);
+  color: var(--dynamics-text-tertiary);
+  margin-bottom: var(--dynamics-space-4);
+}
+
+.stat-loading {
+  color: var(--dynamics-gray-400);
+  font-size: var(--dynamics-font-size-2xl);
+}
+
 /* Quick Actions */
 .quick-actions {
   display: flex;
@@ -125,6 +145,11 @@
   transition: all var(--dynamics-transition-fast);
   text-align: left;
   font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--dynamics-space-2);
+  text-decoration: none;
+  width: fit-content;
 }
 
 .action-btn:hover {
@@ -134,8 +159,9 @@
 
 /* Activity */
 .activity-list {
-  color: var(--dynamics-text-tertiary);
-  font-size: var(--dynamics-font-size-sm);
+  display: flex;
+  flex-direction: column;
+  gap: var(--dynamics-space-3);
 }
 
 /* Status */
