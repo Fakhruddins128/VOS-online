@@ -52,7 +52,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
         <div className="sidebar-footer">
           <div className="user-info" aria-label="User Info">
             <div className="user-details">
-              <div className="user-name">version 1.1.0</div>
+              <div className="user-name">Version - 1.1.0</div>
               <div className="user-role">Team IT - 2026-27</div>
             </div>
           </div>
