@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
+const { ipKeyGenerator } = require('express-rate-limit');
 const database = require('./config/database');
 const { globalErrorHandler, notFoundHandler, gracefulShutdown } = require('./middleware/errorHandler');
 require('dotenv').config();
@@ -100,15 +101,21 @@ const limiter = rateLimit({
 app.use(limiter);
 
 // Stricter rate limiting for authentication endpoints
+// Keyed per IP + account so a failed login for one vendor does not
+// block the entire IP (e.g. an office behind NAT).
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP to 5 requests per windowMs for auth endpoints
+  max: 5, // Limit each IP + account to 5 requests per windowMs for auth endpoints
   message: {
     error: 'Too many authentication attempts, please try again later.',
     retryAfter: '15 minutes'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    const identifier = req.body?.BusinessEmail || req.body?.email || '';
+    return `${ipKeyGenerator(req.ip)}|${String(identifier).trim().toLowerCase()}`;
+  },
 });
 
 if (!isProd) {
