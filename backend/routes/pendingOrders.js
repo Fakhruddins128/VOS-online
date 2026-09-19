@@ -3,6 +3,90 @@ const database = require('../config/database');
 const router = express.Router();
 const debugLog = (...args) => { if (process.env.NODE_ENV !== 'production') console.log(...args); };
 
+// GET /api/pending-orders/counts - Pending order counts grouped by category
+router.get('/counts', async (req, res) => {
+  try {
+    const { vendorId } = req.query;
+
+    if (!vendorId) {
+      return res.status(400).json({
+        success: false,
+        error: 'Vendor ID is required'
+      });
+    }
+
+    const countQuery = `
+      SELECT Category, COUNT(*) as total FROM (
+        (SELECT C2.Description as Category
+        FROM FinishProductOrderMaster OM, FinishProductOrderDetail OD, FinishProductVariantDetail VD, ItemMaster IM, ItemType IT, Vendor V, FP_MaterialMaster M, FP_ColorMaster C, Finish F, ApprovedVendorFinishProduct AV, Unit U, Category3 C3, Category2 C2
+        WHERE IM.FKItemType = IT.ID
+        AND VD.FK_ItemMasterID = IM.ID
+        AND OM.FK_VendorID = V.ID
+        AND OD.FK_FinishProductOrderMasterID = OM.ID
+        AND AV.FK_FinishProductVariantDetail = VD.ID
+        AND AV.FK_VendorID = V.ID
+        AND OD.FK_FinishProductApprovedVariantID = AV.ID
+        AND Vd.FKMaterialID=M.ID
+        AND VD.FKColourID=C.ID
+        AND VD.FKFinishID=F.ID
+        AND V.ID=@vendorId
+        AND (OD.OrderQty - OD.RcvdQty - OD.AutoClosedPenaltyQty) > 0
+        AND OD.Sales_Unit_ID=U.ID
+        AND OD.Status NOT LIKE 'Force Closed'
+        AND OD.Status NOT LIKE 'Auto Closed'
+        AND OM.OrderStat!='Draft'
+        AND C3.FK_Category2ID=C2.ID
+        AND IM.FKSubGroupID=C3.ID)
+        UNION ALL
+        (SELECT C2.Description as Category
+        FROM FinishProductOrderMaster OM, FinishProductOrderDetail OD, FinishProductVariantDetail VD, ItemMaster IM, ItemType IT, Vendor V, FP_MaterialMaster M, FP_ColorMaster C, Finish F, ApprovedVendorFinishProduct AV, Unit U, Category3 C3, Category2 C2
+        WHERE IM.FKItemType = IT.ID
+        AND VD.FK_ItemMasterID = IM.ID
+        AND OM.FK_VendorID = V.ID
+        AND OD.FK_FinishProductOrderMasterID = OM.ID
+        AND AV.FK_FinishProductVariantDetail = VD.ID
+        AND AV.FK_VendorID = V.ID
+        AND OD.FK_FinishProductApprovedVariantID = AV.ID
+        AND Vd.FKMaterialID=M.ID
+        AND VD.FKColourID=C.ID
+        AND VD.FKFinishID=F.ID
+        AND V.ID=@vendorId
+        AND (OD.OrderQty - OD.RcvdQty - OD.AutoClosedPenaltyQty) = 0
+        AND OD.InQCQty > 0
+        AND OD.Sales_Unit_ID=U.ID
+        AND OD.Status NOT LIKE 'Force Closed'
+        AND OD.Status NOT LIKE 'Auto Closed'
+        AND OM.OrderStat!='Draft'
+        AND C3.FK_Category2ID=C2.ID
+        AND IM.FKSubGroupID=C3.ID)
+      ) AS CountByCategory
+      GROUP BY Category
+      ORDER BY Category`;
+
+    const result = await database.query(countQuery, { vendorId: parseInt(vendorId) });
+
+    const rows = result.recordset || result;
+    const data = rows.map((row) => ({
+      category: row.Category || 'Uncategorized',
+      total: Number(row.total) || 0
+    }));
+
+    res.json({
+      success: true,
+      data,
+      total: data.reduce((sum, item) => sum + item.total, 0)
+    });
+
+  } catch (error) {
+    console.error('Error fetching pending order counts:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to fetch pending order counts',
+      message: error.message
+    });
+  }
+});
+
 // GET /api/pending-orders - Get pending orders data with pagination, sorting, and filtering
 router.get('/', async (req, res) => {
   try {

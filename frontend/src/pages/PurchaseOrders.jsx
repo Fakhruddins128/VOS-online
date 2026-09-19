@@ -18,11 +18,11 @@ const PurchaseOrders = () => {
   const modalCloseBtnRef = useRef(null);
 
   const categories = [
+    { value: 'Finish Product', label: 'Finish Product' },
     { value: 'Material', label: 'Material' },
     { value: 'Preps', label: 'Preps' },
     { value: 'Accessories', label: 'Accessories' },
-    { value: 'Packaging', label: 'Packaging' },
-    { value: 'Finish Product', label: 'Finish Product' }
+    { value: 'Packaging', label: 'Packaging' }
   ];
 
   const fetchPurchaseOrders = async (category) => {
@@ -132,7 +132,7 @@ const PurchaseOrders = () => {
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Purchase Orders</title>
+          <title>Pending Orders</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
             h1 { margin: 0 0 4px; font-size: 20px; }
@@ -145,7 +145,7 @@ const PurchaseOrders = () => {
           </style>
         </head>
         <body>
-          <h1>Purchase Orders</h1>
+          <h1>Pending Orders</h1>
           <div class="meta">Generated: ${now} • Category: ${selectedCategory} • Total: ${totalCount}</div>
           <table>
             <thead>

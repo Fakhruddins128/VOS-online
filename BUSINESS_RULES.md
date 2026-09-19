@@ -40,6 +40,8 @@ Pending Orders supports:
 - print
 - product image viewing when image path + picture are available
 
+Dashboard pending-order cards show totals grouped by `Category` (`C2.Description`) from `GET /api/pending-orders/counts`.
+
 ## Purchase Order Draft rules
 Draft page supports exactly these categories:
 - Material

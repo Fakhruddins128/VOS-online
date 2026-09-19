@@ -105,6 +105,25 @@ The SQL combines two result sets:
 1. orders with remaining pending quantity
 2. orders whose remaining quantity is zero but QC quantity is still greater than zero
 
+### GET /api/pending-orders/counts
+Purpose: dashboard summary of pending order totals per `Category` (`C2.Description`).
+
+Required query:
+- `vendorId`
+
+Returns:
+```json
+{
+  "success": true,
+  "data": [
+    { "category": "Textile", "total": 12 }
+  ],
+  "total": 12
+}
+```
+
+Uses the same two pending conditions as `GET /api/pending-orders` (remaining qty > 0, or remaining qty = 0 with `InQCQty > 0`), excludes Force Closed/Auto Closed details and `OrderStat='Draft'`, and groups by `Category`.
+
 ### GET /api/purchase-order-draft
 Required query:
 - `vendorId`

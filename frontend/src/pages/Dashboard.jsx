@@ -10,7 +10,8 @@ const DRAFT_CATEGORIES = ['Material', 'Preps', 'Accessories', 'Packaging', 'Fini
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
-  const [pendingCount, setPendingCount] = useState(null);
+  const [pendingCategories, setPendingCategories] = useState([]);
+  const [pendingLoading, setPendingLoading] = useState(true);
   const [draftCounts, setDraftCounts] = useState({});
   const [draftLoading, setDraftLoading] = useState(true);
 
@@ -25,17 +26,21 @@ const Dashboard = () => {
 
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-      // Fetch pending orders count (limit=1 just to get totalRecords)
+      // Fetch pending orders counts grouped by category
       try {
         const pendingRes = await fetch(
-          `${API_BASE_URL}/api/pending-orders?vendorId=${user.ID}&limit=1`
+          `${API_BASE_URL}/api/pending-orders/counts?vendorId=${user.ID}`
         );
         if (pendingRes.ok) {
           const pendingData = await pendingRes.json();
-          setPendingCount(pendingData.pagination?.totalRecords ?? 0);
+          setPendingCategories(pendingData.data ?? []);
+        } else {
+          setPendingCategories([]);
         }
       } catch {
-        setPendingCount(0);
+        setPendingCategories([]);
+      } finally {
+        setPendingLoading(false);
       }
 
       // Fetch purchase order draft count for each category
@@ -106,11 +111,36 @@ const Dashboard = () => {
 
             <div className="dashboard-card">
               <h3>Pending Orders</h3>
-              <div className="quick-actions">
-                <div className="stat-value">
-                  {pendingCount !== null ? pendingCount : <span className="stat-loading">...</span>}
+              <div className="stat-summary">
+                <div className="stat-total">
+                  <div className="stat-value">
+                    {!pendingLoading ? (
+                      pendingCategories.reduce((sum, item) => sum + (item.total || 0), 0)
+                    ) : (
+                      <span className="stat-loading">...</span>
+                    )}
+                  </div>
+                  <div className="stat-label">pending orders created</div>
                 </div>
-                <div className="stat-label">pending orders created</div>
+                <div className="stat-card-grid">
+                  {pendingLoading ? (
+                    <span className="stat-loading">...</span>
+                  ) : pendingCategories.length === 0 ? (
+                    <div className="stat-label">No pending orders</div>
+                  ) : (
+                    pendingCategories.map((item) => (
+                      <Link
+                        key={item.category}
+                        to="/pending-orders"
+                        className="stat-card"
+                        title={`View ${item.category} pending orders`}
+                      >
+                        <span className="stat-card-count">{item.total}</span>
+                        <span className="stat-card-label">{item.category}</span>
+                      </Link>
+                    ))
+                  )}
+                </div>
                 <Link to="/pending-orders" className="action-btn">
                   <Icon name="list" size={16} /> View Pending Orders
                 </Link>
@@ -119,8 +149,8 @@ const Dashboard = () => {
 
             <div className="dashboard-card">
               <h3>Purchase Order Draft</h3>
-              <div className="draft-summary">
-                <div className="draft-total">
+              <div className="stat-summary">
+                <div className="stat-total">
                   <div className="stat-value">
                     {!draftLoading && draftCounts ? (
                       DRAFT_CATEGORIES.reduce((sum, c) => sum + (draftCounts[c] || 0), 0)
@@ -130,22 +160,22 @@ const Dashboard = () => {
                   </div>
                   <div className="stat-label">total draft orders available</div>
                 </div>
-                <div className="draft-category-grid">
+                <div className="stat-card-grid">
                   {DRAFT_CATEGORIES.map((category) => (
                     <Link
                       key={category}
                       to="/purchase-order-draft"
-                      className="draft-category-card"
+                      className="stat-card"
                       title={`View ${category} draft orders`}
                     >
-                      <span className="draft-category-count">
+                      <span className="stat-card-count">
                         {!draftLoading && draftCounts ? (
                           draftCounts[category] ?? 0
                         ) : (
                           <span className="stat-loading">...</span>
                         )}
                       </span>
-                      <span className="draft-category-label">{category}</span>
+                      <span className="stat-card-label">{category}</span>
                     </Link>
                   ))}
                 </div>

@@ -45,6 +45,14 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Dashboard pending order counts by category
+- The dashboard previously showed a single total pending-order count.
+- Added `GET /api/pending-orders/counts` (`backend/routes/pendingOrders.js`): returns pending totals grouped by `Category` (`C2.Description`) using the same two pending conditions and exclusions as the main pending-orders query.
+- `frontend/src/pages/Dashboard.jsx`: the Pending Orders card now shows a total plus one count card per category, each linking to `/pending-orders`.
+- Renamed the shared stat-card CSS (`Dashboard.css`) from `draft-summary`/`draft-category-*` to generic `stat-summary`/`stat-card-*` since both the pending and draft cards use them.
+- Docs updated: `API_DOCUMENTATION.md`, `BUSINESS_RULES.md`.
+- Verification: backend `node --check` passes; frontend `npm run build` passes; `npm run lint` reports only pre-existing issues.
+
 ## 2026-09-19 — Purchase Orders page (new) + Finish Product default
 - Added a new **Purchase Orders** page and API that provides purchase orders (non-draft) with the same category filter as Purchase Order Draft:
   - `backend/routes/purchaseOrders.js`, mounted at `GET /api/purchase-orders`. Mirrors the draft route's five category queries (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) but selects `OM.OrderStat != 'Draft'`.

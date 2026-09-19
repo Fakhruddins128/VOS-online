@@ -18,11 +18,12 @@ const PurchaseOrderDraft = () => {
   const modalCloseBtnRef = useRef(null);
 
   const categories = [
+    { value: 'Finish Product', label: 'Finish Product' },
     { value: 'Material', label: 'Material' },
     { value: 'Preps', label: 'Preps' },
     { value: 'Accessories', label: 'Accessories' },
-    { value: 'Packaging', label: 'Packaging' },
-    { value: 'Finish Product', label: 'Finish Product' }
+    { value: 'Packaging', label: 'Packaging' }
+    
   ];
 
   const fetchPurchaseOrderDraft = async (category) => {
