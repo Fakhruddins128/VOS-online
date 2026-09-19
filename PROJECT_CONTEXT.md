@@ -15,7 +15,7 @@ VOS Online is a vendor portal used to let vendors authenticate and view operatio
 - Product-image modal viewing
 - Printing of Pending Orders and Purchase Order Draft pages
 - Pagination and sorting for Pending Orders
-- Purchase Order Draft category selection
+- Category selection on Pending Orders, Purchase Orders, and Purchase Order Draft pages
 
 ## Frontend
 - React 19

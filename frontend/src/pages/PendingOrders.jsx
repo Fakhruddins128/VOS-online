@@ -8,7 +8,16 @@ const PendingOrders = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user, isAuthenticated } = useAuth();
-  
+
+  const categories = [
+    { value: 'Material', label: 'Material' },
+    { value: 'Preps', label: 'Preps' },
+    { value: 'Accessories', label: 'Accessories' },
+    { value: 'Packaging', label: 'Packaging' },
+    { value: 'Finish Product', label: 'Finish Product' }
+  ];
+  const [selectedCategory, setSelectedCategory] = useState('Finish Product');
+
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -29,7 +38,7 @@ const PendingOrders = () => {
 
   useEffect(() => {
     fetchPendingOrders();
-  }, [currentPage, limit, sortBy, sortOrder, search, user, isAuthenticated]);
+  }, [currentPage, limit, sortBy, sortOrder, search, selectedCategory, user, isAuthenticated]);
 
   const fetchPendingOrders = async () => {
     try {
@@ -48,7 +57,8 @@ const PendingOrders = () => {
         limit: limit.toString(),
         sortBy,
         sortOrder,
-        vendorId: user.ID.toString()
+        vendorId: user.ID.toString(),
+        category: selectedCategory
       });
       if (search) {
         queryParams.append('search', search);
@@ -102,6 +112,13 @@ const PendingOrders = () => {
     setSearchInput('');
     setSearch('');
     setCurrentPage(1);
+  };
+
+  const handleCategoryChange = (category) => {
+    setSearchInput('');
+    setSearch('');
+    setCurrentPage(1);
+    setSelectedCategory(category);
   };
 
   const renderSortableHeader = (label, column) => (
@@ -186,7 +203,7 @@ const PendingOrders = () => {
         </head>
         <body>
           <h1>Pending Orders</h1>
-          <div class="meta">Generated: ${now} • Sort: ${sortBy} ${sortOrder} • Page: ${currentPage} • Per page: ${limit} • Total: ${totalRecords}</div>
+          <div class="meta">Generated: ${now} • Category: ${selectedCategory} • Sort: ${sortBy} ${sortOrder} • Page: ${currentPage} • Per page: ${limit} • Total: ${totalRecords}</div>
           <table>
             <thead>
               <tr>
@@ -272,6 +289,26 @@ const PendingOrders = () => {
             Print
           </button>
         </header>
+
+        {/* Category Radio Buttons */}
+        <div className="category-filter">
+          <h3>Select Category:</h3>
+          <div className="radio-group">
+            {categories.map((category) => (
+              <label key={category.value} className="radio-option">
+                <input
+                  type="radio"
+                  name="category"
+                  value={category.value}
+                  checked={selectedCategory === category.value}
+                  onChange={() => handleCategoryChange(category.value)}
+                  disabled={loading}
+                />
+                <span className="radio-label">{category.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
 
         {/* Search & Toolbar */}
         <div className="orders-toolbar">
@@ -462,7 +499,7 @@ const PendingOrders = () => {
         </div>
 
         <div className="orders-summary">
-          <p>Total Orders: {totalRecords} | Page {currentPage} of {totalPages}</p>
+          <p>Total Orders: {totalRecords} | Category: {selectedCategory} | Page {currentPage} of {totalPages}</p>
         </div>
       </div>
     </div>

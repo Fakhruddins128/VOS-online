@@ -47,11 +47,11 @@ router.get('/', async (req, res) => {
         query = `SELECT V.CompanyName as Vendor, OM.OrderNo, OM.OrderDate, 
                  (IM.ItemCode+'-'+C.Code) as ItemCode, AV.OldCode, 
                  IM.ProductName as 'Description', OD.OrderQty as 'ReserveQty' 
-                 FROM ItemMaster IM, AccessoryVariantDetail VD, FP_ColorMaster C, 
-                 ApprovedVendorAccessory AV, Vendor V, AccessoryOrderMaster OM, AccessoryOrderDetail OD 
+                 FROM ItemMaster IM, AccessoriesVariantDetail VD, FP_ColorMaster C, 
+                 ApprovedVendorAccessories AV, Vendor V, AccessoriesOrderMaster OM, AccessoriesOrderDetail OD 
                  WHERE VD.FK_ItemMasterID=IM.ID AND AV.FK_VendorID=V.ID 
-                 AND AV.FK_AccessoryVariantDetail=VD.ID AND OD.FK_AccessoryOrderMasterID=OM.ID 
-                 AND OD.FK_AccessoryVariantDetailID=AV.ID AND OM.OrderStat!='Draft' 
+                 AND AV.FK_AccessoriesVariantDetail=VD.ID AND OD.FK_AccessoriesOrderMasterID=OM.ID 
+                 AND OD.FK_AccessoriesVariantDetailID=AV.ID AND OM.OrderStat!='Draft' 
                  AND C.ID=VD.FK_ColourID AND OM.FK_VendorID=V.ID AND OM.FK_VendorID=@vendorId 
                  ORDER BY OM.OrderNo DESC`;
         break;

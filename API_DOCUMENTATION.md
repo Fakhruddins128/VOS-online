@@ -85,6 +85,8 @@ Optional query parameters:
 - `limit` default 10
 - `sortBy` default `OrderNo`
 - `sortOrder` default `DESC`
+- `search` free-text filter on `Order No.` and `Item Code`
+- `category` default `Finish Product`; one of `Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`
 
 Supported sort keys:
 - `OrderNo`
@@ -99,11 +101,26 @@ Supported sort keys:
 Returns:
 - `data`
 - `pagination`
-- `sorting`
+- `sorting` (includes `category`)
 
-The SQL combines two result sets:
+For `Finish Product`, the SQL combines two result sets:
 1. orders with remaining pending quantity
 2. orders whose remaining quantity is zero but QC quantity is still greater than zero
+
+Non-Finish-Product categories query their own order tables (`Material`/`Prep`/`Accessories`/`Packaging` order
+masters + details + variant details + approved-vendor tables) and apply the same two pending conditions.
+Schema notes (verified against the live `ERPOnline` DB):
+- Accessories tables are plural: `AccessoriesOrderDetail`, `AccessoriesVariantDetail`, `ApprovedVendorAccessories`.
+- Non-FP order detail tables have no `AutoClosedPenaltyQty`, `DeliveryDate`, `FinalDeliveryDate`, or `CalculatedPrice`,
+  so for those categories Pending = `OrderQty - RcvdQty`, delivery/final-date/closing-days columns are `NULL`, and
+  `Price` is computed as `FOBPrice × ExRate × remaining qty` (`FOBPrice`/`ExRate` are `nvarchar`, read via `TRY_CAST`).
+- Stock is only available on `AccessoriesVariantDetail`/`PackagingVariantDetail` (`T_Stock`) and
+  `ApprovedVendorMaterial` (`InHand`); Material uses `AV.InHand`, Preps has no stock column (returns `NULL`).
+- Queries run on a compatibility level 100 database: `TRY_CAST`/`FORMAT`/`OFFSET…FETCH` are used (all verified),
+  never `TRY_CONVERT`.
+- The `Accessories` cases of `GET /api/purchase-order-draft` and `GET /api/purchase-orders` were also corrected
+  from the non-existent singular table names (`AccessoryVariantDetail`, `ApprovedVendorAccessory`,
+  `AccessoryOrderMaster`, `AccessoryOrderDetail`) to the real plural tables.
 
 ### GET /api/pending-orders/counts
 Purpose: dashboard summary of pending order totals per `Category` (`C2.Description`).

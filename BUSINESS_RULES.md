@@ -21,23 +21,31 @@ Forgot-password:
 - attempts to email the temporary password
 
 ## Pending Orders rules
-The page is vendor-specific.
+The page is vendor-specific and now supports all five categories: `Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product` (default `Finish Product`).
 Current SQL excludes:
 - Draft order masters
 - Force Closed details
 - Auto Closed details
 
-Primary pending condition:
+Primary pending condition (Finish Product):
 `OrderQty - RcvdQty - AutoClosedPenaltyQty > 0`
 
-Additional QC-related rows:
+Additional QC-related rows (Finish Product):
 `OrderQty - RcvdQty - AutoClosedPenaltyQty = 0` AND `InQCQty > 0`
+
+For non-Finish-Product categories (`Material`, `Preps`, `Accessories`, `Packaging`):
+- The same two conditions apply but without the penalty term: pending = `OrderQty - RcvdQty`, rows included when `pending > 0` or (`pending = 0` AND `InQCQty > 0`).
+- Delivery date / final date / closing days do not exist on these order detail tables, so those columns return `NULL`.
+- Price is derived as `FOBPrice × ExRate × remaining qty` (`FOBPrice`/`ExRate` are stored as `nvarchar` and read with `TRY_CAST`).
+- Stock is shown only where available: `AccessoriesVariantDetail`/`PackagingVariantDetail`.`T_Stock`; Material uses `ApprovedVendorMaterial`.`InHand`; Preps has no stock column.
+- Accessories tables are plural in the live schema: `AccessoriesOrderDetail`, `AccessoriesVariantDetail`, `ApprovedVendorAccessories`.
 
 Pending Orders supports:
 - pagination
 - sorting
+- category selection (resets search and pagination)
 - refresh
-- print
+- print (includes the selected category)
 - product image viewing when image path + picture are available
 
 Dashboard pending-order cards show totals grouped by `Category` (`C2.Description`) from `GET /api/pending-orders/counts`.

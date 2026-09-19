@@ -63,6 +63,75 @@
 }
 
 /* ============================================
+   Category Filter
+   ============================================ */
+
+.category-filter {
+  background: var(--dynamics-bg-primary);
+  padding: var(--dynamics-space-4) var(--dynamics-space-6);
+  border-radius: var(--dynamics-radius-lg);
+  border: 1px solid var(--dynamics-border-subtle);
+  box-shadow: var(--dynamics-shadow-depth-2);
+  margin-bottom: var(--dynamics-space-4);
+}
+
+.category-filter h3 {
+  margin: 0 0 var(--dynamics-space-3);
+  color: var(--dynamics-text-primary);
+  font-size: var(--dynamics-font-size-md);
+  font-weight: var(--dynamics-font-weight-semibold);
+}
+
+.radio-group {
+  display: flex;
+  gap: var(--dynamics-space-2);
+  flex-wrap: wrap;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: var(--dynamics-space-2);
+  cursor: pointer;
+  padding: var(--dynamics-space-2) var(--dynamics-space-3);
+  border-radius: var(--dynamics-radius-md);
+  transition: all var(--dynamics-transition-fast);
+  background: var(--dynamics-gray-50);
+  border: 1px solid var(--dynamics-border-subtle);
+}
+
+.radio-option:hover {
+  background: var(--dynamics-gray-100);
+  border-color: var(--dynamics-border-medium);
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  accent-color: var(--dynamics-primary);
+  cursor: pointer;
+  margin: 0;
+}
+
+.radio-option input[type="radio"]:checked + .radio-label {
+  color: var(--dynamics-primary);
+  font-weight: var(--dynamics-font-weight-semibold);
+}
+
+.radio-option:has(input[type="radio"]:checked) {
+  background: var(--dynamics-primary-lighter);
+  border-color: var(--dynamics-primary);
+}
+
+.radio-label {
+  font-size: var(--dynamics-font-size-sm);
+  color: var(--dynamics-text-primary);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--dynamics-transition-fast);
+}
+
+/* ============================================
    Table Container
    ============================================ */
 
@@ -661,6 +730,19 @@
 
   .pending-orders-header h1 {
     font-size: var(--dynamics-font-size-xl);
+  }
+
+  .category-filter {
+    padding: var(--dynamics-space-3) var(--dynamics-space-4);
+  }
+
+  .radio-group {
+    flex-direction: column;
+    gap: var(--dynamics-space-2);
+  }
+
+  .radio-option {
+    justify-content: flex-start;
   }
 
   .orders-toolbar {

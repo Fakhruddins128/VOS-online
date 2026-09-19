@@ -45,6 +45,18 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Pending Orders category filter (all 5 categories)
+- The Pending Orders page now mirrors the Purchase Order Draft/Purchase Orders category filter with `Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product` (default `Finish Product`).
+- `backend/routes/pendingOrders.js` (`GET /api/pending-orders`): added the `category` query parameter. The Finish Product SQL is preserved verbatim. The four non-Finish categories query their own order master + order detail + variant detail + approved-vendor tables.
+- Verified against the live `ERPOnline` DB (SQL Server 2017, database compatibility level 100) and fixed along the way:
+  - Accessories tables are plural in the real schema; the old singular names (`AccessoryVariantDetail`, `ApprovedVendorAccessory`, `AccessoryOrderMaster`, `AccessoryOrderDetail`) did not exist, so Accessories was broken end-to-end (draft, purchase orders, pending). Corrected all three route files to `Accessories*`/`ApprovedVendorAccessories`.
+  - Non-FP order-detail tables have no `AutoClosedPenaltyQty`, `DeliveryDate`, `FinalDeliveryDate`, or `CalculatedPrice`, so for those categories Pending = `OrderQty - RcvdQty`, delivery/final/closing-days are `NULL`, and `Price = FOBPrice × ExRate × remaining qty`.
+  - `FOBPrice`/`ExRate` are `nvarchar(50)`: read via `TRY_CAST` (compat level 100 rejects `TRY_CONVERT`).
+  - Stock is only available on `AccessoriesVariantDetail`/`PackagingVariantDetail`.`T_Stock` and `ApprovedVendorMaterial`.`InHand`; Material uses `AV.InHand`, Preps has no stock column (`NULL`).
+- `frontend/src/pages/PendingOrders.jsx` + `PendingOrders.css`: category radio group (default `Finish Product`), `category` passed to the API, category change resets search + pagination, print/summary include the selected category.
+- Docs updated: `API_DOCUMENTATION.md`, `BUSINESS_RULES.md`, `DATABASE.md`.
+- Verification (all against live DB): `/api/pending-orders` returns 200 for all 5 categories with correct pagination + row shape; `/api/purchase-order-draft` and `/api/purchase-orders` Accessories/Packaging return 200 with data after the table-name fix; backend `node --check` passes; frontend `npm run build` passes; `npm run lint` reports only the established pre-existing issues.
+
 ## 2026-09-19 — Dashboard: Purchase Orders card replaces Profile Information
 - `frontend/src/pages/Dashboard.jsx`: removed the static Profile Information card; the dashboard now leads with a **Purchase Orders** card showing a total plus one count card per category (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`), fetched from `GET /api/purchase-orders` and linking to `/purchase-orders`.
 - The dashboard now has three count cards: Purchase Orders, Pending Orders (by `Category`), Purchase Order Draft (by category).

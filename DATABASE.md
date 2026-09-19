@@ -63,10 +63,10 @@ Pending Orders and Purchase Order Draft queries reference many existing tables, 
 - ApprovedVendorPrep
 - PrepOrderMaster
 - PrepOrderDetail
-- AccessoryVariantDetail
-- ApprovedVendorAccessory
-- AccessoryOrderMaster
-- AccessoryOrderDetail
+- AccessoriesVariantDetail
+- ApprovedVendorAccessories
+- AccessoriesOrderMaster
+- AccessoriesOrderDetail
 - PackagingVariantDetail
 - ApprovedVendorPackaging
 - PackagingOrderMaster
@@ -75,25 +75,26 @@ Pending Orders and Purchase Order Draft queries reference many existing tables, 
 These table relationships should be treated as confirmed only to the extent they are explicitly used in the current SQL. Do not infer a complete ERD from these queries.
 
 ## Important business-calculation fields in Pending Orders
-Current SQL calculates/returns:
+Current SQL calculates/returns (Finish Product has the full set; non-Finish-Product categories omit the columns their order-detail tables do not have):
 - Order
 - Received
 - QC
 - Reject
 - Pending
-- Stock
-- Delivery Date
-- Final Delivery Date
-- Closing Days
+- Stock (only where the table provides it: Accessories/Packaging `T_Stock`, Material `InHand`, Preps none)
+- Delivery Date (Finish Product only; `NULL` otherwise)
+- Final Delivery Date (Finish Product only; `NULL` otherwise)
+- Closing Days (Finish Product only; `NULL` otherwise)
 - PR Status
 - isCost
 - Price
 - LastReceive
 - L_Receive
-- AutoClosedPenaltyQty
+- AutoClosedPenaltyQty (Finish Product only; `NULL` otherwise)
 
 Current Pending calculation:
-`OrderQty - RcvdQty - AutoClosedPenaltyQty`
+- Finish Product: `OrderQty - RcvdQty - AutoClosedPenaltyQty`
+- Non-Finish-Product categories: `OrderQty - RcvdQty`
 
 Orders with positive Pending are included. A second result set includes rows where this remaining quantity is zero and `InQCQty > 0`.
 
