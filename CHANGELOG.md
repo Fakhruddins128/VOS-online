@@ -45,6 +45,13 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Dashboard Purchase Orders card shows pending counts only
+- Previously the **Purchase Orders** card counted every non-draft purchase order per category via `GET /api/purchase-orders`.
+- It now shows only the **pending** order count per category (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) by querying `GET /api/pending-orders?vendorId=…&category=…&limit=1` and reading `pagination.totalRecords` — the same count the Pending Orders page shows for that category. The aggregate label changed from "total purchase orders" to "pending purchase orders".
+- Category sub-cards now link to `/pending-orders` (where the pending rows live); the footer action still links to `/purchase-orders`.
+- No backend/API changes. Docs updated: `BUSINESS_RULES.md`.
+- Verification: frontend `npm run build` passes; `npm run lint` reports only the established pre-existing issues.
+
 ## 2026-09-19 — Pending Orders category filter (all 5 categories)
 - The Pending Orders page now mirrors the Purchase Order Draft/Purchase Orders category filter with `Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product` (default `Finish Product`).
 - `backend/routes/pendingOrders.js` (`GET /api/pending-orders`): added the `category` query parameter. The Finish Product SQL is preserved verbatim. The four non-Finish categories query their own order master + order detail + variant detail + approved-vendor tables.

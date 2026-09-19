@@ -14,7 +14,7 @@ const Dashboard = () => {
   const [pendingLoading, setPendingLoading] = useState(true);
   const [draftCounts, setDraftCounts] = useState({});
   const [draftLoading, setDraftLoading] = useState(true);
-  const [purchaseCounts, setPurchaseCounts] = useState({});
+  const [pendingPurchaseCounts, setPendingPurchaseCounts] = useState({});
   const [purchaseLoading, setPurchaseLoading] = useState(true);
 
   useEffect(() => {
@@ -76,17 +76,17 @@ const Dashboard = () => {
         setDraftLoading(false);
       }
 
-      // Fetch purchase orders count for each category
+      // Fetch pending purchase order count for each category
       try {
         const results = await Promise.all(
           DRAFT_CATEGORIES.map(async (category) => {
             try {
               const purchaseRes = await fetch(
-                `${API_BASE_URL}/api/purchase-orders?vendorId=${user.ID}&category=${encodeURIComponent(category)}`
+                `${API_BASE_URL}/api/pending-orders?vendorId=${user.ID}&category=${encodeURIComponent(category)}&limit=1`
               );
               if (purchaseRes.ok) {
                 const purchaseData = await purchaseRes.json();
-                return { category, count: purchaseData.count ?? purchaseData.data?.length ?? 0 };
+                return { category, count: purchaseData.pagination?.totalRecords ?? 0 };
               }
             } catch {
               // counted as zero below
@@ -95,14 +95,14 @@ const Dashboard = () => {
           })
         );
 
-        setPurchaseCounts(
+        setPendingPurchaseCounts(
           results.reduce((acc, item) => {
             acc[item.category] = item.count;
             return acc;
           }, {})
         );
       } catch {
-        setPurchaseCounts({});
+        setPendingPurchaseCounts({});
       } finally {
         setPurchaseLoading(false);
       }
@@ -138,25 +138,25 @@ const Dashboard = () => {
               <div className="stat-summary">
                 <div className="stat-total">
                   <div className="stat-value">
-                    {!purchaseLoading && purchaseCounts ? (
-                      DRAFT_CATEGORIES.reduce((sum, c) => sum + (purchaseCounts[c] || 0), 0)
+                    {!purchaseLoading && pendingPurchaseCounts ? (
+                      DRAFT_CATEGORIES.reduce((sum, c) => sum + (pendingPurchaseCounts[c] || 0), 0)
                     ) : (
                       <span className="stat-loading">...</span>
                     )}
                   </div>
-                  <div className="stat-label">total purchase orders</div>
+                  <div className="stat-label">pending purchase orders</div>
                 </div>
                 <div className="stat-card-grid">
                   {DRAFT_CATEGORIES.map((category) => (
                     <Link
                       key={category}
-                      to="/purchase-orders"
+                      to="/pending-orders"
                       className="stat-card"
-                      title={`View ${category} purchase orders`}
+                      title={`View ${category} pending orders`}
                     >
                       <span className="stat-card-count">
-                        {!purchaseLoading && purchaseCounts ? (
-                          purchaseCounts[category] ?? 0
+                        {!purchaseLoading && pendingPurchaseCounts ? (
+                          pendingPurchaseCounts[category] ?? 0
                         ) : (
                           <span className="stat-loading">...</span>
                         )}

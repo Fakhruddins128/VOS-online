@@ -6,8 +6,8 @@ import './Sidebar.css';
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', path: '/dashboard', icon: 'grid' },
-    // { id: 'pending-orders', label: 'Pending Orders', path: '/pending-orders', icon: 'clipboardList' },
-    { id: 'purchase-orders', label: 'Pending Orders', path: '/purchase-orders', icon: 'shoppingCart' },
+    { id: 'pending-orders', label: 'Pending Orders', path: '/pending-orders', icon: 'clipboardList' },
+    // { id: 'purchase-orders', label: 'Pending Orders', path: '/purchase-orders', icon: 'shoppingCart' },
     { id: 'purchase-order-draft', label: 'Purchase Order Draft', path: '/purchase-order-draft', icon: 'fileText' },
     { id: 'change-password', label: 'Change Password', path: '/change-password', icon: 'key' },
   ];

@@ -49,6 +49,7 @@ Pending Orders supports:
 - product image viewing when image path + picture are available
 
 Dashboard pending-order cards show totals grouped by `Category` (`C2.Description`) from `GET /api/pending-orders/counts`.
+The dashboard **Purchase Orders** card shows only the pending order count per order category (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`), taken from `GET /api/pending-orders` `pagination.totalRecords` for each category.
 
 ## Purchase Order Draft rules
 Draft page supports exactly these categories:
