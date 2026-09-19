@@ -45,6 +45,14 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Dashboard purchase order draft category counts
+- `frontend/src/pages/Dashboard.jsx` previously showed a single draft count fetched only for the `Material` category (marked as the "default"), so it undercounted drafts in other categories.
+- The Purchase Order Draft card now fetches the draft count for all 5 categories (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) in parallel via `GET /api/purchase-order-draft` (`encodeURIComponent` is used for `Finish Product`).
+- Each category count is shown in its own sub-card (`draft-category-card`) with the total draft count above; each sub-card and the footer button link to `/purchase-order-draft`.
+- No backend/API changes were required — the endpoint already returned `count` for all categories.
+- Added `Dashboard.css` styles for `.draft-summary`, `.draft-total`, `.draft-category-grid`, `.draft-category-card`, `.draft-category-count`, and `.draft-category-label`.
+- Verification: `npm run lint` reports only pre-existing issues (`AuthContext` fast-refresh error, 2 pre-existing hook-dep warnings); `npm run build` passes.
+
 ## 2026-09-15 — Frontend accessibility pass
 - Added `frontend/src/components/Icon.jsx`: an inline-SVG icon component (stroke-based, 24×24 outline family) with no new dependencies. Icons render `aria-hidden="true"` and `focusable="false"`.
 - Replaced all emoji icons with the Icon component:

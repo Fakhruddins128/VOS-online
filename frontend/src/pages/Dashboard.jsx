@@ -5,11 +5,14 @@ import { Link } from 'react-router-dom';
 import Icon from '../components/Icon';
 import './Dashboard.css';
 
+const DRAFT_CATEGORIES = ['Material', 'Preps', 'Accessories', 'Packaging', 'Finish Product'];
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
   const [pendingCount, setPendingCount] = useState(null);
-  const [draftCount, setDraftCount] = useState(null);
+  const [draftCounts, setDraftCounts] = useState({});
+  const [draftLoading, setDraftLoading] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -35,17 +38,35 @@ const Dashboard = () => {
         setPendingCount(0);
       }
 
-      // Fetch purchase order draft count (Material category default)
+      // Fetch purchase order draft count for each category
       try {
-        const draftRes = await fetch(
-          `${API_BASE_URL}/api/purchase-order-draft?vendorId=${user.ID}&category=Material`
+        const results = await Promise.all(
+          DRAFT_CATEGORIES.map(async (category) => {
+            try {
+              const draftRes = await fetch(
+                `${API_BASE_URL}/api/purchase-order-draft?vendorId=${user.ID}&category=${encodeURIComponent(category)}`
+              );
+              if (draftRes.ok) {
+                const draftData = await draftRes.json();
+                return { category, count: draftData.count ?? draftData.data?.length ?? 0 };
+              }
+            } catch {
+              // counted as zero below
+            }
+            return { category, count: 0 };
+          })
         );
-        if (draftRes.ok) {
-          const draftData = await draftRes.json();
-          setDraftCount(draftData.count ?? draftData.data?.length ?? 0);
-        }
+
+        setDraftCounts(
+          results.reduce((acc, item) => {
+            acc[item.category] = item.count;
+            return acc;
+          }, {})
+        );
       } catch {
-        setDraftCount(0);
+        setDraftCounts({});
+      } finally {
+        setDraftLoading(false);
       }
     };
 
@@ -98,11 +119,36 @@ const Dashboard = () => {
 
             <div className="dashboard-card">
               <h3>Purchase Order Draft</h3>
-              <div className="activity-list">
-                <div className="stat-value">
-                  {draftCount !== null ? draftCount : <span className="stat-loading">...</span>}
+              <div className="draft-summary">
+                <div className="draft-total">
+                  <div className="stat-value">
+                    {!draftLoading && draftCounts ? (
+                      DRAFT_CATEGORIES.reduce((sum, c) => sum + (draftCounts[c] || 0), 0)
+                    ) : (
+                      <span className="stat-loading">...</span>
+                    )}
+                  </div>
+                  <div className="stat-label">total draft orders available</div>
                 </div>
-                <div className="stat-label">draft orders available</div>
+                <div className="draft-category-grid">
+                  {DRAFT_CATEGORIES.map((category) => (
+                    <Link
+                      key={category}
+                      to="/purchase-order-draft"
+                      className="draft-category-card"
+                      title={`View ${category} draft orders`}
+                    >
+                      <span className="draft-category-count">
+                        {!draftLoading && draftCounts ? (
+                          draftCounts[category] ?? 0
+                        ) : (
+                          <span className="stat-loading">...</span>
+                        )}
+                      </span>
+                      <span className="draft-category-label">{category}</span>
+                    </Link>
+                  ))}
+                </div>
                 <Link to="/purchase-order-draft" className="action-btn">
                   <Icon name="fileText" size={16} /> View Draft Orders
                 </Link>
