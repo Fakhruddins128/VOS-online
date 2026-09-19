@@ -45,6 +45,11 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Dashboard: Purchase Orders card replaces Profile Information
+- `frontend/src/pages/Dashboard.jsx`: removed the static Profile Information card; the dashboard now leads with a **Purchase Orders** card showing a total plus one count card per category (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`), fetched from `GET /api/purchase-orders` and linking to `/purchase-orders`.
+- The dashboard now has three count cards: Purchase Orders, Pending Orders (by `Category`), Purchase Order Draft (by category).
+- Verification: frontend `npm run build` passes; `npm run lint` reports only pre-existing issues.
+
 ## 2026-09-19 — Dashboard pending order counts by category
 - The dashboard previously showed a single total pending-order count.
 - Added `GET /api/pending-orders/counts` (`backend/routes/pendingOrders.js`): returns pending totals grouped by `Category` (`C2.Description`) using the same two pending conditions and exclusions as the main pending-orders query.

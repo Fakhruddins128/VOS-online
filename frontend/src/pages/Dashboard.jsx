@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [pendingLoading, setPendingLoading] = useState(true);
   const [draftCounts, setDraftCounts] = useState({});
   const [draftLoading, setDraftLoading] = useState(true);
+  const [purchaseCounts, setPurchaseCounts] = useState({});
+  const [purchaseLoading, setPurchaseLoading] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -73,6 +75,37 @@ const Dashboard = () => {
       } finally {
         setDraftLoading(false);
       }
+
+      // Fetch purchase orders count for each category
+      try {
+        const results = await Promise.all(
+          DRAFT_CATEGORIES.map(async (category) => {
+            try {
+              const purchaseRes = await fetch(
+                `${API_BASE_URL}/api/purchase-orders?vendorId=${user.ID}&category=${encodeURIComponent(category)}`
+              );
+              if (purchaseRes.ok) {
+                const purchaseData = await purchaseRes.json();
+                return { category, count: purchaseData.count ?? purchaseData.data?.length ?? 0 };
+              }
+            } catch {
+              // counted as zero below
+            }
+            return { category, count: 0 };
+          })
+        );
+
+        setPurchaseCounts(
+          results.reduce((acc, item) => {
+            acc[item.category] = item.count;
+            return acc;
+          }, {})
+        );
+      } catch {
+        setPurchaseCounts({});
+      } finally {
+        setPurchaseLoading(false);
+      }
     };
 
     fetchCounts();
@@ -101,11 +134,40 @@ const Dashboard = () => {
         <div className="dashboard-content">
           <div className="dashboard-grid">
             <div className="dashboard-card">
-              <h3>Profile Information</h3>
-              <div className="user-info">
-                <p><strong>Company Name:</strong>  {user.VendorName}</p>
-                <p><strong>Business Email:</strong> {user.BusinessEmail}</p>
-                <p><strong>Contact Person:</strong> {user.ContactPerson}</p>
+              <h3>Purchase Orders</h3>
+              <div className="stat-summary">
+                <div className="stat-total">
+                  <div className="stat-value">
+                    {!purchaseLoading && purchaseCounts ? (
+                      DRAFT_CATEGORIES.reduce((sum, c) => sum + (purchaseCounts[c] || 0), 0)
+                    ) : (
+                      <span className="stat-loading">...</span>
+                    )}
+                  </div>
+                  <div className="stat-label">total purchase orders</div>
+                </div>
+                <div className="stat-card-grid">
+                  {DRAFT_CATEGORIES.map((category) => (
+                    <Link
+                      key={category}
+                      to="/purchase-orders"
+                      className="stat-card"
+                      title={`View ${category} purchase orders`}
+                    >
+                      <span className="stat-card-count">
+                        {!purchaseLoading && purchaseCounts ? (
+                          purchaseCounts[category] ?? 0
+                        ) : (
+                          <span className="stat-loading">...</span>
+                        )}
+                      </span>
+                      <span className="stat-card-label">{category}</span>
+                    </Link>
+                  ))}
+                </div>
+                <Link to="/purchase-orders" className="action-btn">
+                  <Icon name="shoppingCart" size={16} /> View Purchase Orders
+                </Link>
               </div>
             </div>
 
