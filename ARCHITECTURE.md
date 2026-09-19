@@ -25,7 +25,7 @@ Backend -> Nodemailer -> configured SMTP/email service
 - `frontend/src/contexts/AuthContext.jsx` — authentication/user state
 - `frontend/src/services/api.js` — Axios API client plus API helper objects
 - `frontend/src/components/` — Login, Navbar, Sidebar
-- `frontend/src/pages/` — Home, Dashboard, PendingOrders, PurchaseOrderDraft, ChangePassword, ForgotPassword
+- `frontend/src/pages/` — Home, Dashboard, PendingOrders, PurchaseOrderDraft, PurchaseOrders, ChangePassword, ForgotPassword
 - `frontend/src/styles/dynamics-theme.css`, `App.css`, and page/component CSS — UI styling
 - `frontend/src/assets/` — static assets
 
@@ -35,6 +35,7 @@ Backend -> Nodemailer -> configured SMTP/email service
 - `/forgot-password`
 - `/dashboard`
 - `/pending-orders`
+- `/purchase-orders`
 - `/purchase-order-draft`
 - `/change-password`
 - catch-all -> `/login`
@@ -76,6 +77,7 @@ Route modules:
 - `routes/users.js`
 - `routes/pendingOrders.js`
 - `routes/purchaseOrderDraft.js`
+- `routes/purchaseOrders.js`
 
 ## Database architecture
 `backend/config/database.js` provides a small wrapper around `mssql`.

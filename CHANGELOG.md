@@ -45,6 +45,15 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-19 — Purchase Orders page (new) + Finish Product default
+- Added a new **Purchase Orders** page and API that provides purchase orders (non-draft) with the same category filter as Purchase Order Draft:
+  - `backend/routes/purchaseOrders.js`, mounted at `GET /api/purchase-orders`. Mirrors the draft route's five category queries (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) but selects `OM.OrderStat != 'Draft'`.
+  - `frontend/src/pages/PurchaseOrders.jsx` + `PurchaseOrders.css` (reuses the Draft page layout via `@import`), with refresh/print, image modal, and vendor-scoped fetching; routes at `/purchase-orders` in `App.jsx` and added to the Sidebar.
+  - `frontend/src/components/Icon.jsx`: added the `shoppingCart` icon used by the new sidebar item.
+- Default selected category is now **Finish Product** on both the new Purchase Orders page and the existing Purchase Order Draft page (`PurchaseOrderDraft.jsx` default changed from `Material`).
+- Docs updated: `API_DOCUMENTATION.md`, `BUSINESS_RULES.md`, `ARCHITECTURE.md`, `PROJECT_CONTEXT.md`.
+- Verification: backend `node --check` passes; frontend `npm run build` passes; `npm run lint` reports only pre-existing issues (AuthContext fast-refresh error + the established hook-dep warnings, now including `PurchaseOrders.jsx` mirroring `PurchaseOrderDraft.jsx`).
+
 ## 2026-09-19 — Dashboard purchase order draft category counts
 - `frontend/src/pages/Dashboard.jsx` previously showed a single draft count fetched only for the `Material` category (marked as the "default"), so it undercounted drafts in other categories.
 - The Purchase Order Draft card now fetches the draft count for all 5 categories (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) in parallel via `GET /api/purchase-order-draft` (`encodeURIComponent` is used for `Finish Product`).

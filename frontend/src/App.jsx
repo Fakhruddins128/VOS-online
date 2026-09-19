@@ -7,6 +7,7 @@ import Login from './components/Login';
 import Dashboard from './pages/Dashboard';
 import PendingOrders from './pages/PendingOrders';
 import PurchaseOrderDraft from './pages/PurchaseOrderDraft';
+import PurchaseOrders from './pages/PurchaseOrders';
 import ChangePassword from './pages/ChangePassword';
 import ForgotPassword from './pages/ForgotPassword';
 import './styles/dynamics-theme.css';
@@ -44,6 +45,7 @@ function AppContent() {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/pending-orders" element={<PendingOrders />} />
               <Route path="/purchase-order-draft" element={<PurchaseOrderDraft />} />
+              <Route path="/purchase-orders" element={<PurchaseOrders />} />
               <Route path="/change-password" element={<ChangePassword />} />
               {/* Catch-all route to redirect 404s to login */}
               <Route path="*" element={<Navigate to="/login" replace />} />

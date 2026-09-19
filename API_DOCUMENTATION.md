@@ -127,6 +127,30 @@ Returns:
 }
 ```
 
+### GET /api/purchase-orders
+Purpose: purchase orders (non-draft) per category. Mirrors `purchase-order-draft` but returns orders where `OrderStat != 'Draft'`.
+
+Required query:
+- `vendorId`
+- `category` defaults to `Finish Product`
+
+Supported categories:
+- `Material`
+- `Preps`
+- `Accessories`
+- `Packaging`
+- `Finish Product`
+
+Returns:
+```json
+{
+  "success": true,
+  "data": [],
+  "category": "Finish Product",
+  "count": 0
+}
+```
+
 ## Frontend API helper mismatch
 `frontend/src/services/api.js` also defines:
 - `/users`

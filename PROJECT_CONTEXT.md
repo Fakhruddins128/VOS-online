@@ -7,6 +7,7 @@ VOS Online is a vendor portal used to let vendors authenticate and view operatio
 - Login
 - Dashboard
 - Pending Orders
+- Purchase Orders
 - Purchase Order Draft
 - Change Password
 - Forgot Password

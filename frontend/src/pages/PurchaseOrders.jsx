@@ -2,9 +2,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../components/Icon';
-import './PurchaseOrderDraft.css';
+import './PurchaseOrders.css';
 
-const PurchaseOrderDraft = () => {
+const PurchaseOrders = () => {
   const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('Finish Product');
@@ -25,7 +25,7 @@ const PurchaseOrderDraft = () => {
     { value: 'Finish Product', label: 'Finish Product' }
   ];
 
-  const fetchPurchaseOrderDraft = async (category) => {
+  const fetchPurchaseOrders = async (category) => {
     if (!user?.ID && !user?.id) {
       setError('User not authenticated');
       return;
@@ -39,7 +39,7 @@ const PurchaseOrderDraft = () => {
     try {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
       const response = await fetch(
-        `${API_BASE_URL}/api/purchase-order-draft?category=${category}&vendorId=${vendorId}`,
+        `${API_BASE_URL}/api/purchase-orders?category=${encodeURIComponent(category)}&vendorId=${vendorId}`,
         {
           method: 'GET',
           headers: {
@@ -61,16 +61,16 @@ const PurchaseOrderDraft = () => {
       }
 
       const data = await response.json();
-      
+
       if (data.success) {
         setOrders(data.data || []);
         setTotalCount(data.count || 0);
       } else {
-        throw new Error(data.error || 'Failed to fetch purchase order draft data');
+        throw new Error(data.error || 'Failed to fetch purchase order data');
       }
     } catch (err) {
-      console.error('Error fetching purchase order draft:', err);
-      setError(err.message || 'Failed to fetch purchase order draft data');
+      console.error('Error fetching purchase orders:', err);
+      setError(err.message || 'Failed to fetch purchase order data');
       setOrders([]);
       setTotalCount(0);
     } finally {
@@ -80,7 +80,7 @@ const PurchaseOrderDraft = () => {
 
   useEffect(() => {
     if (user?.ID || user?.id) {
-      fetchPurchaseOrderDraft(selectedCategory);
+      fetchPurchaseOrders(selectedCategory);
     }
   }, [selectedCategory, user?.ID, user?.id]);
 
@@ -122,17 +122,17 @@ const PurchaseOrderDraft = () => {
   }, [showImageModal]);
 
   const handleRefresh = () => {
-    fetchPurchaseOrderDraft(selectedCategory);
+    fetchPurchaseOrders(selectedCategory);
   };
 
-  const printDrafts = () => {
+  const printOrders = () => {
     const now = new Date().toLocaleString();
     const html = `
       <!doctype html>
       <html>
         <head>
           <meta charset="utf-8" />
-          <title>Purchase Order Draft</title>
+          <title>Purchase Orders</title>
           <style>
             body { font-family: Arial, sans-serif; padding: 16px; color: #111; }
             h1 { margin: 0 0 4px; font-size: 20px; }
@@ -145,7 +145,7 @@ const PurchaseOrderDraft = () => {
           </style>
         </head>
         <body>
-          <h1>Purchase Order Draft</h1>
+          <h1>Purchase Orders</h1>
           <div class="meta">Generated: ${now} • Category: ${selectedCategory} • Total: ${totalCount}</div>
           <table>
             <thead>
@@ -198,7 +198,7 @@ const PurchaseOrderDraft = () => {
      return (
        <div className="purchase-order-draft">
          <div className="container">
-           <h1>Purchase Order Draft</h1>
+           <h1>Purchase Orders</h1>
            <p>Redirecting to login...</p>
          </div>
        </div>
@@ -209,12 +209,12 @@ const PurchaseOrderDraft = () => {
     <div className="purchase-order-draft">
       <div className="purchase-order-draft-container">
         <header className="purchase-order-draft-header">
-          <h1>Purchase Order Draft</h1>
+          <h1>Purchase Orders</h1>
           <button onClick={handleRefresh} className="refresh-btn" disabled={loading}>
             <Icon name="refreshCw" size={18} />
             Refresh
           </button>
-          <button onClick={printDrafts} className="refresh-btn" style={{ marginLeft: '8px' }} disabled={loading}>
+          <button onClick={printOrders} className="refresh-btn" style={{ marginLeft: '8px' }} disabled={loading}>
             <Icon name="printer" size={18} />
             Print
           </button>
@@ -243,7 +243,7 @@ const PurchaseOrderDraft = () => {
         {/* Summary */}
         <div className="orders-summary">
           <p>
-            Showing {totalCount} {selectedCategory.toLowerCase()} draft orders
+            Showing {totalCount} {selectedCategory.toLowerCase()} orders
             {user?.companyName && ` for ${user.companyName}`}
           </p>
         </div>
@@ -252,7 +252,7 @@ const PurchaseOrderDraft = () => {
         {loading && (
           <div className="loading-container">
             <div className="loading-spinner"></div>
-            <p>Loading {selectedCategory.toLowerCase()} draft orders...</p>
+            <p>Loading {selectedCategory.toLowerCase()} orders...</p>
           </div>
         )}
 
@@ -324,7 +324,7 @@ const PurchaseOrderDraft = () => {
                 {orders.length === 0 ? (
                   <tr>
                     <td colSpan="7" className="no-data">
-                      No {selectedCategory.toLowerCase()} draft orders found
+                      No {selectedCategory.toLowerCase()} orders found
                     </td>
                   </tr>
                 ) : (
@@ -360,4 +360,4 @@ const PurchaseOrderDraft = () => {
   );
 };
 
-export default PurchaseOrderDraft;
+export default PurchaseOrders;

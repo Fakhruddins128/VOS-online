@@ -16,6 +16,7 @@ const isProd = process.env.NODE_ENV === 'production';
 const usersRoutes = require('./routes/users');
 const pendingOrdersRoutes = require('./routes/pendingOrders');
 const purchaseOrderDraftRoutes = require('./routes/purchaseOrderDraft');
+const purchaseOrdersRoutes = require('./routes/purchaseOrders');
 
 // Helper to parse comma-separated origins from env
 const parseOrigins = (value) => (value || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -133,6 +134,7 @@ app.get('/', (req, res) => {
 app.use('/api/users', authLimiter, usersRoutes);
 app.use('/api/pending-orders', pendingOrdersRoutes);
 app.use('/api/purchase-order-draft', purchaseOrderDraftRoutes);
+app.use('/api/purchase-orders', purchaseOrdersRoutes);
 
 // Database connection test endpoint (disabled in production)
 if (!isProd) {

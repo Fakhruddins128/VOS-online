@@ -52,6 +52,11 @@ The backend returns only orders where `OrderStat='Draft'` and `FK_VendorID=@vend
 
 Each category uses its own variant/order tables and constructs an item code/description appropriate to that category.
 
+## Purchase Orders rules
+The Purchase Orders page provides the same category filter as Purchase Order Draft but returns orders where `OrderStat!='Draft'` and `FK_VendorID=@vendorId`.
+
+Default selected category for both Purchase Orders and Purchase Order Draft is `Finish Product`.
+
 ## UI behavior
 - Login, root, and forgot-password hide the sidebar.
 - Other routes display the sidebar.
