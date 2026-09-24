@@ -87,12 +87,26 @@ app.use(helmet({
 app.use(cors(corsOptions));
 
 // Rate limiting
+// Limits are configurable per environment so an office behind a single NAT
+// address is not locked out by normal portal usage.
+const toPositiveInt = (value, fallback) => {
+  const parsed = parseInt(value, 10);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+const RATE_LIMIT_WINDOW_MS = toPositiveInt(process.env.RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000);
+const RATE_LIMIT_MAX = toPositiveInt(process.env.RATE_LIMIT_MAX, 1000);
+const AUTH_RATE_LIMIT_WINDOW_MS = toPositiveInt(process.env.AUTH_RATE_LIMIT_WINDOW_MS, 15 * 60 * 1000);
+const AUTH_RATE_LIMIT_MAX = toPositiveInt(process.env.AUTH_RATE_LIMIT_MAX, 20);
+
+const describeWindow = (ms) => `${Math.max(1, Math.round(ms / 60000))} minutes`;
+
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
+  windowMs: RATE_LIMIT_WINDOW_MS,
+  max: RATE_LIMIT_MAX, // Limit each IP to this many requests per windowMs
   message: {
     error: 'Too many requests from this IP, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: describeWindow(RATE_LIMIT_WINDOW_MS)
   },
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
@@ -105,14 +119,15 @@ app.use(limiter);
 // Keyed per IP + account so a failed login for one vendor does not
 // block the entire IP (e.g. an office behind NAT).
 const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // Limit each IP + account to 5 requests per windowMs for auth endpoints
+  windowMs: AUTH_RATE_LIMIT_WINDOW_MS,
+  max: AUTH_RATE_LIMIT_MAX, // Limit each IP + account per windowMs for auth endpoints
   message: {
     error: 'Too many authentication attempts, please try again later.',
-    retryAfter: '15 minutes'
+    retryAfter: describeWindow(AUTH_RATE_LIMIT_WINDOW_MS)
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true, // Only failed attempts count toward the limit
   keyGenerator: (req) => {
     const identifier = req.body?.BusinessEmail || req.body?.email || '';
     return `${ipKeyGenerator(req.ip)}|${String(identifier).trim().toLowerCase()}`;

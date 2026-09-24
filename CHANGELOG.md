@@ -45,6 +45,20 @@ Append a dated entry here for every meaningful future change, including:
 - security changes
 - deployment/configuration changes
 
+## 2026-09-24 — Rate limits raised and made configurable
+- Users hit `Too many requests from this IP, please try again later.` during normal portal use. The global limiter in `backend/server.js` allowed only **100 requests / 15 min per IP**, which a single SPA session can exhaust (and an office behind one NAT address shares).
+- Global limit default raised to **1000 requests / 15 min**; auth limit default raised from **5 to 20** attempts per 15 min (still keyed per IP + account).
+- The auth limiter now sets `skipSuccessfulRequests: true`, so only **failed** login attempts count toward the limit — a user who signs in successfully is no longer pushed toward lockout.
+- All four values are now configurable via optional env vars (positive integers; invalid values fall back to the defaults):
+  - `RATE_LIMIT_WINDOW_MS` (default `900000`)
+  - `RATE_LIMIT_MAX` (default `1000`)
+  - `AUTH_RATE_LIMIT_WINDOW_MS` (default `900000`)
+  - `AUTH_RATE_LIMIT_MAX` (default `20`)
+  The `retryAfter` string in both limiter messages is now derived from the configured window instead of being hardcoded to `15 minutes`.
+- No API contract, route, or database changes. Docs updated: `backend/README.md`.
+- Verification: `node --check backend/server.js` passes; limiter behaviour smoke-tested in isolation (4 successful logins are not counted; failed logins are blocked with `429` once the max is reached).
+- Note (not changed): `/api/users` still applies `authLimiter` to **every** route on that router, not just login — so non-auth calls such as vendors/change-password share the strict counter. Worth revisiting separately.
+
 ## 2026-09-19 — Dashboard Purchase Orders card shows pending counts only
 - Previously the **Purchase Orders** card counted every non-draft purchase order per category via `GET /api/purchase-orders`.
 - It now shows only the **pending** order count per category (`Material`, `Preps`, `Accessories`, `Packaging`, `Finish Product`) by querying `GET /api/pending-orders?vendorId=…&category=…&limit=1` and reading `pagination.totalRecords` — the same count the Pending Orders page shows for that category. The aggregate label changed from "total purchase orders" to "pending purchase orders".

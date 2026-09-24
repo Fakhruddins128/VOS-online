@@ -58,7 +58,18 @@ DB_PASSWORD=your_password
 DB_PORT=1433
 DB_ENCRYPT=true
 DB_TRUST_SERVER_CERTIFICATE=true
+
+# Rate Limiting (all optional; defaults shown)
+# Global limit applied to every request
+RATE_LIMIT_WINDOW_MS=900000
+RATE_LIMIT_MAX=1000
+# Stricter limit for /api/users auth endpoints, keyed per IP + account.
+# Only failed attempts are counted.
+AUTH_RATE_LIMIT_WINDOW_MS=900000
+AUTH_RATE_LIMIT_MAX=20
 ```
+
+> Values must be positive integers; anything else falls back to the default.
 
 ### Database Setup
 
